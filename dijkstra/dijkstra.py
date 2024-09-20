@@ -2,8 +2,9 @@ from queue import PriorityQueue
 
 class node:
 	name = ""
-	cost = 0
+	cost = 9999
 	seen = False
+	back = None
 
 	def __init__(self, name):
 		self.connected = []
@@ -20,9 +21,11 @@ with open("edgelist.txt") as file:
 	for line in file:
 		a, b, weight = [ int(v) for v in line.strip().split(",") ]
 
-def walk(init):
+def walk(init, target):
 	queue = PriorityQueue() # Маленькие первыми
 	queue.put(init)
+
+	init.cost = 0
 
 	# Перебираем соседей
 	# обновляем стоимость
@@ -38,11 +41,30 @@ def walk(init):
 				continue
 
 			linkage_key = f"{loc.name},{dst.name}"
-			dst.cost = loc.cost + weights[linkage_key]
+			cost_from_here = loc.cost + weights[linkage_key]
+
+			if cost_from_here < dst.cost:
+				dst.cost = cost_from_here
+				dst.back = loc
 
 			print(f"Establish that {dst}")
 
 			queue.put(dst)
+
+	# Пробегаемся от цели к началу
+	hist = []
+	loc = target
+
+	while True:
+		hist.append(loc.name)
+		if loc.back:
+			loc = loc.back
+		else:
+			break
+
+	hist.reverse()
+
+	print(f"Path from {init.name} to {target.name} costs {target.cost}: {hist}")
 
 weights = {
 	"1,2": 10,
@@ -58,4 +80,4 @@ a.connected.append(b)
 a.connected.append(c)
 b.connected.append(c)
 
-walk(a)
+walk(a, c)
