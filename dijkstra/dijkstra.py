@@ -17,10 +17,6 @@ class node:
 	def __str__(self):
 		return f"Node(name={self.name}, cost={self.cost})"
 
-with open("edgelist.txt") as file:
-	for line in file:
-		a, b, weight = [ int(v) for v in line.strip().split(",") ]
-
 def walk(init, target):
 	queue = PriorityQueue() # Маленькие первыми
 	queue.put(init)
@@ -66,18 +62,25 @@ def walk(init, target):
 
 	print(f"Path from {init.name} to {target.name} costs {target.cost}: {hist}")
 
-weights = {
-	"1,2": 10,
-	"1,3": 40,
-	"2,3": 10
-}
+weights = {}
+nodes = {}
 
-a = node("1")
-b = node("2")
-c = node("3")
+with open("edgelist.txt") as file:
+	for line in file:
+		a, b, weight = [ int(v) for v in line.strip().split(",") ]
+		weights[ f"{a},{b}" ] = weight
 
-a.connected.append(b)
-a.connected.append(c)
-b.connected.append(c)
+		if a not in nodes:
+			nodes[a] = node(f"{a}")
+		a = nodes[a]
 
-walk(a, c)
+		if b not in nodes:
+			nodes[b] = node(f"{b}")
+		b = nodes[b]
+
+		a.connected.append(b)
+
+start = nodes[1]
+target = nodes[9]
+
+walk(start, target)
