@@ -14,8 +14,8 @@ with open("edgelist_simple.txt") as f:
 cycle = nx.algorithms.approximation.greedy_tsp(G, source="a")
 #print(nx.algorithms.approximation.traveling_salesman_problem(G))
 
-#pos = nx.spring_layout(G)
-pos = nx.spiral_layout(G)
+pos = nx.spring_layout(G)
+#pos = nx.spiral_layout(G)
 
 edge_list = list(nx.utils.pairwise(cycle))
 
@@ -39,7 +39,8 @@ nx.draw_networkx(
     pos,
     edge_color=[G.get_edge_data(u, v)["color"] for u, v in G.edges],
     node_color="white", # Node color
-    edgecolors="black"  # Node edge color
+    edgecolors="black",  # Node edge color
+	connectionstyle="arc3,rad=0.05"
 )
 
 
@@ -47,6 +48,8 @@ nx.draw_networkx_edge_labels(
 	G,
 	pos,
 	labels,
+	label_pos=0.3,
+	connectionstyle="arc3,rad=0.05"
 )
 
 plt.show()
