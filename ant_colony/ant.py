@@ -99,7 +99,10 @@ def display(edges):
 #
 # Загрузка графа
 #
-with open("edgelist.txt") as f:
+with open("synthetic.txt") as f:
+	#for line in f:
+	#	break
+
 	for line in f:
 		a, b, w = line.strip().split(",")
 		w = int(w)
@@ -230,8 +233,8 @@ for i in range(1000):
 
 	apply_evaporation()
 
-print("Ants stuck", stuck)
+print("Final cost", ant.cost)
 plt.plot(cost)
 plt.show()
 
-display(edges)
+#display(edges)
