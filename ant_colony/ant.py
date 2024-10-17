@@ -15,13 +15,13 @@ rho = 0.9		# Испарение феромона
 #
 # Нода
 #
-class node:
+class Node:
 	def __init__(self, name):
 		self.connected = []
 		self.name = name
 
 	def __repr__(self):
-		return f"node({self.name})"
+		return f"Node({self.name})"
 
 nodes = {}
 
@@ -29,7 +29,7 @@ nodes = {}
 # Ребро
 # Тау и ню
 #
-class edge:
+class Edge:
 	cost = 0
 	tau = 0
 	nu = 0
@@ -105,22 +105,22 @@ with open("edgelist.txt") as f:
 		w = int(w)
 
 		if a not in nodes:
-			nodes[a] = node(a)
+			nodes[a] = Node(a)
 		a = nodes[a]
 
 		if b not in nodes:
-			nodes[b] = node(b)
+			nodes[b] = Node(b)
 		b = nodes[b]
 
-		edges[ a, b ] = edge(
+		edge = Edge(
 			cost = w,
 			tau = 0.1,
 			nu = 1/w
 		)
 
-		#a.connected.append( ( b, edges[ a, b ] ) )
-		#a.connected[b] = edges[ a, b ]
-		a.connected.append(b)
+		edges[ a, b ] = edge
+
+		a.connected.append( (b, edge) )
 
 #
 # Что от нас требуется:
@@ -150,7 +150,7 @@ with open("edgelist.txt") as f:
 #
 class Ant:
 	def __init__(self, loc):
-		self.edges = []
+		self.seen = set()
 		self.hist = []
 		self.cost = 0
 		self.init = loc
@@ -160,30 +160,34 @@ class Ant:
 		options = []
 		weights = []
 
-		self.hist.append(self.loc)
+		self.seen.add(self.loc)
 
-		avail = set( self.loc.connected ) - set( self.hist )
+		for dst, edge in self.loc.connected:
+			if dst in self.seen:
+				continue
 
-		if not avail:
-			if len(self.hist) != len(nodes):
-				return "stuck"
-
-			if self.init not in self.loc.connected:
-				return "stuck"
-
-			self.finish()
-			return "fin"
-
-		for dst in avail:
-			k = (self.loc, dst)
-			edge = edges[k]
 			nu, tau = edge
 
 			options.append( (dst, edge) )
 			weights.append( tau**alpha * nu**beta )
 
-		#w_sum = sum(weights)
-		#weights = [x/w_sum for x in weights]
+		if not options:
+			if len(self.seen) != len(nodes):
+				return "stuck"
+
+			fin_edge = None
+
+			for dst, edge in self.loc.connected:
+				if dst == self.init:
+					fin_edge = edge
+					break
+
+			if not fin_edge:
+				return "stuck"
+
+			self.cost += fin_edge.cost
+			self.update_tau()
+			return "fin"
 
 		where, = choices(options, weights)
 		dst, edge = where
@@ -191,21 +195,15 @@ class Ant:
 		self.cost += edge.cost
 		self.loc = dst
 
-		self.edges.append(edge)
+		self.hist.append(edge)
 
 		return "continue"
 
-	def finish(self):
-		k = (self.loc, self.init)
-		self.cost += edges[k].cost
-		self.update_tau()
-
 	def update_tau(self):
-		for edge in self.edges:
+		for edge in self.hist:
 			edge.tau += 1/self.cost
 
 
-init = nodes["a"]
 cost = []
 stuck = 0
 
@@ -231,8 +229,6 @@ for i in range(1000):
 			assert 0
 
 	apply_evaporation()
-
-print(ant.hist)
 
 print("Ants stuck", stuck)
 plt.plot(cost)
