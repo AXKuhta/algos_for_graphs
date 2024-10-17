@@ -99,7 +99,7 @@ def display(edges):
 #
 # Загрузка графа
 #
-with open("edgelist_simple.txt") as f:
+with open("edgelist.txt") as f:
 	for line in f:
 		a, b, w = line.strip().split(",")
 		w = int(w)
@@ -167,6 +167,10 @@ class Ant:
 		if not avail:
 			if len(self.hist) != len(nodes):
 				return "stuck"
+
+			if self.init not in self.loc.connected:
+				return "stuck"
+
 			self.finish()
 			return "fin"
 
@@ -192,7 +196,6 @@ class Ant:
 		return "continue"
 
 	def finish(self):
-		assert self.init in self.loc.connected
 		k = (self.loc, self.init)
 		self.cost += edges[k].cost
 		self.update_tau()
