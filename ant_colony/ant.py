@@ -1,9 +1,16 @@
-from random import choices
+
+from random import choice, choices
+
+import matplotlib.pyplot as plt
+import networkx as nx
 
 #
 # Настройки
 #
-p = 0.9		# Испарение феромона
+alpha = 1.0
+beta = 1.0
+rho = 0.9		# Испарение феромона
+
 
 #
 # Нода
@@ -16,17 +23,83 @@ class node:
 	def __repr__(self):
 		return f"node({self.name})"
 
+nodes = {}
+
 #
+# Ребро
 # Тау и ню
 #
-all_tau = {}
-all_nu = {}
-nodes = {}
+class edge:
+	cost = 0
+	tau = 0
+	nu = 0
+
+	def __init__(self, cost, tau, nu):
+		self.cost = cost
+		self.tau = tau
+		self.nu = nu
+
+	def __iter__(self):
+		yield self.nu
+		yield self.tau
+
+edges = {}
+
+#
+# Отрисовка графа
+#
+def display(edges):
+	G = nx.DiGraph()
+
+	labels_w = {}
+	labels_i = {}
+
+	for k, v in edges.items():
+		a, b = k
+
+		G.add_edge(a.name, b.name)
+
+		labels_w[ (a.name, b.name) ] = f"{v.cost}"
+		labels_i[ (a.name, b.name) ] = f"{v.tau:.2f}"
+
+	pos = nx.circular_layout(G)
+
+	plt.figure(figsize=[16, 9], dpi=300)
+
+	nx.draw_networkx(
+		G,
+		pos,
+		node_color="white", # Node colors
+		edgecolors="black",  # Node edge color
+		connectionstyle="arc3,rad=0.05"
+	)
+
+	nx.draw_networkx_edge_labels(
+		G,
+		pos,
+		labels_w,
+		connectionstyle="arc3,rad=0.05",
+		font_size=5
+	)
+
+	nx.draw_networkx_edge_labels(
+		G,
+		pos,
+		labels_i,
+		connectionstyle="arc3,rad=0.05",
+		font_color="white",
+		label_pos = 0.3,
+		rotate=False,
+		bbox={}
+	)
+
+	plt.show()
+
 
 #
 # Загрузка графа
 #
-with open("edgelist.txt") as f:
+with open("edgelist_simple.txt") as f:
 	for line in f:
 		a, b, w = line.strip().split(",")
 		w = int(w)
@@ -39,88 +112,127 @@ with open("edgelist.txt") as f:
 			nodes[b] = node(b)
 		b = nodes[b]
 
-		all_tau[ a, b ] = 0.1
-		all_nu[ a, b ] = 1/w
+		edges[ a, b ] = edge(
+			cost = w,
+			tau = 0.1,
+			nu = 1/w
+		)
 
+		#a.connected.append( ( b, edges[ a, b ] ) )
+		#a.connected[b] = edges[ a, b ]
 		a.connected.append(b)
 
-set_nodes = set(nodes.values())
+#
+# Что от нас требуется:
+# - Мы муравей
+# - Надо построить план
+#   Это будет цикл
+#
+# - План выполняется
+#   Все tau обновляются
+# - Застряли
+#   Умираем
+#
 
-solutions = []
+#
+# Какие у нас будут операции:
+# - Доставание рандомной ноды
+# - Получение набора соседей
+# - Вычет посещенных мест
+# - Сортировка по весам
+#
+# Данные шаги выполняются за n
+# Путь не нашёлся, всё, кирдык
+#
 
 #
 # Муравей
 #
-class ant:
+class Ant:
 	def __init__(self, loc):
-		self.seen = set()
+		self.edges = []
 		self.hist = []
+		self.cost = 0
+		self.init = loc
 		self.loc = loc
 
 	def advance(self):
 		options = []
 		weights = []
 
-		for dst in self.loc.connected:
-			a = self.loc
-			b = dst
+		self.hist.append(self.loc)
 
-			nu = all_nu[a, b]
-			tau = all_tau[a, b]
+		avail = set( self.loc.connected ) - set( self.hist )
 
-			options.append(dst)
-			weights.append(nu*tau)
+		if not avail:
+			if len(self.hist) != len(nodes):
+				return "stuck"
+			self.finish()
+			return "fin"
+
+		for dst in avail:
+			k = (self.loc, dst)
+			edge = edges[k]
+			nu, tau = edge
+
+			options.append( (dst, edge) )
+			weights.append( tau**alpha * nu**beta )
 
 		#w_sum = sum(weights)
 		#weights = [x/w_sum for x in weights]
 
 		where, = choices(options, weights)
-		self.hist.append( (self.loc, where) )
+		dst, edge = where
 
-		self.loc = where
-		self.seen.add(self.loc)
+		self.cost += edge.cost
+		self.loc = dst
 
-		if self.seen == set_nodes:
-			self.activate_trail()
-			solutions.append(len(self.hist))
-			return 0
+		self.edges.append(edge)
 
-		return 1
+		return "continue"
 
-	def activate_trail(self):
-		self.hist.reverse()
+	def finish(self):
+		assert self.init in self.loc.connected
+		k = (self.loc, self.init)
+		self.cost += edges[k].cost
+		self.update_tau()
 
-		for i, edge in enumerate(self.hist):
-			all_tau[edge] += 1 * (p**i)
+	def update_tau(self):
+		for edge in self.edges:
+			edge.tau += 1/self.cost
 
-# Начальная (и конечная) точка
+
 init = nodes["a"]
+cost = []
+stuck = 0
 
-# Муравьи
-ants = [ant(init) for i in range(10)]
+def apply_evaporation():
+	for k, v in edges.items():
+		v.tau *= 0.9
 
+# Запускаем муравья
 for i in range(1000):
-	ants_ = []
-
-	# Шагнуть каждым муравьём
-	# Вернулись - убрать старого, создать нового
-	for x in ants:
-		if x.advance():
-			ants_.append(x)
+	init = choice(list(nodes.values()))
+	ant = Ant(init)
+	while True:
+		status = ant.advance()
+		if status == "continue":
+			pass
+		elif status == "stuck":
+			stuck += 1
+			break
+		elif status == "fin":
+			cost.append(ant.cost)
+			break
 		else:
-			ants_.append( ant(init) )
+			assert 0
 
-	# Применить испарение
-	for k in all_tau:
-		all_tau[k] = all_tau[k] * p
+	apply_evaporation()
 
-	ants = ants_
+print(ant.hist)
 
-	if not len(ants):
-		break
-
-import matplotlib.pyplot as plt
-
-plt.figure()
-plt.plot(solutions)
+print("Ants stuck", stuck)
+plt.plot(cost)
 plt.show()
+
+display(edges)
