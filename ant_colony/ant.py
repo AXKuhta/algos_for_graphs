@@ -235,6 +235,11 @@ for i in range(100):
 		pending = retained
 		apply_evaporation()
 
+	# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
+	if len(set(cost[-500:])) == 1:
+		print("stagnated at", i)
+		break
+
 print("Final cost", ant.cost)
 plt.plot(cost)
 plt.show()
