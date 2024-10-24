@@ -48,7 +48,7 @@ class Edge:
 		yield self.tau
 
 	def __repr__(self):
-		return f"{self.a.name} -> {self.b.name}"
+		return f"{self.a.name} -{self.cost}-> {self.b.name}"
 
 edges = {}
 
@@ -197,6 +197,7 @@ class Ant:
 			if not fin_edge:
 				return "stuck"
 
+			self.hist.append(fin_edge)
 			self.cost += fin_edge.cost
 			self.update_tau()
 			return "fin"
@@ -222,12 +223,15 @@ min_cost_log = []
 min_cost = 9999
 min_path = None
 
+# Применить испарение
 def apply_evaporation():
 	for k, v in edges.items():
 		v.tau *= rho
 
-for i in range(100):
-	pending = [Ant(init) for init in nodes.values()]
+# Главный цикл
+# Макс. 1000 перезапусков
+for i in range(1000):
+	pending = [Ant(init) for init in nodes.values()] # Поставить муравья в каждую ноду
 
 	# Ходим
 	while pending:
@@ -254,7 +258,7 @@ for i in range(100):
 		apply_evaporation()
 
 	# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
-	if len(set(min_cost_log[-1000:])) == 1:
+	if len(set(min_cost_log[-500:])) == 1:
 		print("stagnated at", i)
 		break
 
