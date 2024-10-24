@@ -33,15 +33,22 @@ class Edge:
 	cost = 0
 	tau = 0
 	nu = 0
+	a = None
+	b = None
 
-	def __init__(self, cost, tau, nu):
+	def __init__(self, cost, tau, nu, a, b):
 		self.cost = cost
 		self.tau = tau
 		self.nu = nu
+		self.a = a
+		self.b = b
 
 	def __iter__(self):
 		yield self.nu
 		yield self.tau
+
+	def __repr__(self):
+		return f"{self.a.name} -> {self.b.name}"
 
 edges = {}
 
@@ -118,7 +125,9 @@ with open("synthetic.txt") as f:
 		edge = Edge(
 			cost = w,
 			tau = 0.1,
-			nu = 1/w
+			nu = 1/w,
+			a=a,
+			b=b
 		)
 
 		edges[ a, b ] = edge
@@ -206,9 +215,12 @@ class Ant:
 		for edge in self.hist:
 			edge.tau += 1/self.cost
 
-
-cost = []
-stuck = 0
+# Вести историю стоимости найденых путей
+# И кумулятивного минимума стоимости
+cost_log = []
+min_cost_log = []
+min_cost = 9999
+min_path = None
 
 def apply_evaporation():
 	for k, v in edges.items():
@@ -228,7 +240,13 @@ for i in range(100):
 			elif status == "stuck":
 				pass
 			elif status == "fin":
-				cost.append(ant.cost)
+				cost_log.append(ant.cost)
+
+				if ant.cost < min_cost:
+					min_cost = ant.cost
+					min_path = ant.hist
+
+				min_cost_log.append(min_cost)
 			else:
 				assert 0
 
@@ -236,12 +254,17 @@ for i in range(100):
 		apply_evaporation()
 
 	# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
-	if len(set(cost[-500:])) == 1:
+	if len(set(min_cost_log[-1000:])) == 1:
 		print("stagnated at", i)
 		break
 
-print("Final cost", ant.cost)
-plt.plot(cost)
+print("Final cost", min_cost)
+print("Final path", min_path)
+
+plt.title("Total shortest path")
+plt.xlabel("Ant number")
+plt.ylabel("Cumulative min cost")
+plt.plot(min_cost_log)
 plt.show()
 
 #display(edges)
