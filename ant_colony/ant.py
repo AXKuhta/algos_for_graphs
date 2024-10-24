@@ -204,7 +204,8 @@ for i in range(1000):
 print("Final cost", min_cost)
 print("Final path", min_path)
 
-plt.title("Total shortest path")
+plt.figure(dpi=300)
+plt.title("Cost history")
 plt.xlabel("Ant number")
 plt.ylabel("Cumulative min cost")
 plt.plot(min_cost_log)
