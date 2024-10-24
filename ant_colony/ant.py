@@ -1,8 +1,10 @@
 
-from random import choice, choices
+from random import choice, choices, seed
 
 import matplotlib.pyplot as plt
 import networkx as nx
+
+seed(42)
 
 #
 # Настройки
