@@ -2,7 +2,6 @@
 from random import choice, choices, seed
 
 import matplotlib.pyplot as plt
-import networkx as nx
 
 seed(42)
 
@@ -55,57 +54,6 @@ class Edge:
 edges = {}
 
 #
-# Отрисовка графа
-#
-def display(edges):
-	G = nx.DiGraph()
-
-	labels_w = {}
-	labels_i = {}
-
-	for k, v in edges.items():
-		a, b = k
-
-		G.add_edge(a.name, b.name)
-
-		labels_w[ (a.name, b.name) ] = f"{v.cost}"
-		labels_i[ (a.name, b.name) ] = f"{v.tau:.2f}"
-
-	pos = nx.circular_layout(G)
-
-	plt.figure(figsize=[16, 9], dpi=300)
-
-	nx.draw_networkx(
-		G,
-		pos,
-		node_color="white", # Node colors
-		edgecolors="black",  # Node edge color
-		connectionstyle="arc3,rad=0.05"
-	)
-
-	nx.draw_networkx_edge_labels(
-		G,
-		pos,
-		labels_w,
-		connectionstyle="arc3,rad=0.05",
-		font_size=5
-	)
-
-	nx.draw_networkx_edge_labels(
-		G,
-		pos,
-		labels_i,
-		connectionstyle="arc3,rad=0.05",
-		font_color="white",
-		label_pos = 0.3,
-		rotate=False,
-		bbox={}
-	)
-
-	plt.show()
-
-
-#
 # Загрузка графа
 #
 with open("synthetic.txt") as f:
@@ -146,17 +94,6 @@ with open("synthetic.txt") as f:
 #   Все tau обновляются
 # - Застряли
 #   Умираем
-#
-
-#
-# Какие у нас будут операции:
-# - Доставание рандомной ноды
-# - Получение набора соседей
-# - Вычет посещенных мест
-# - Сортировка по весам
-#
-# Данные шаги выполняются за n
-# Путь не нашёлся, всё, кирдык
 #
 
 #
@@ -272,5 +209,3 @@ plt.xlabel("Ant number")
 plt.ylabel("Cumulative min cost")
 plt.plot(min_cost_log)
 plt.show()
-
-#display(edges)
