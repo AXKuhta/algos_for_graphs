@@ -48,7 +48,7 @@ class Edge:
 		yield self.tau
 
 	def __repr__(self):
-		return f"{self.a.name} -{self.cost}-> {self.b.name}"
+		return f"{self.a.name} --{self.cost}--> {self.b.name}"
 
 edges = {}
 

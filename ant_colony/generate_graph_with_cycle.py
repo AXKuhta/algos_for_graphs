@@ -11,7 +11,7 @@ for i in range(nodes):
 	a = i
 	b = i+1
 
-	edges[ a, b ] = randint(1, 30)
+	edges[ a, b ] = 1
 
 #
 # Замкнуть цикл
