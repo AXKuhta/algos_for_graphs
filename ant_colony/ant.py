@@ -9,7 +9,7 @@ import networkx as nx
 #
 alpha = 1.0
 beta = 1.0
-rho = 0.9		# Испарение феромона
+rho = 0.99		# Испарение феромона (больше - медленнее)
 
 
 #
@@ -224,7 +224,7 @@ min_path = None
 
 def apply_evaporation():
 	for k, v in edges.items():
-		v.tau *= 0.9
+		v.tau *= rho
 
 for i in range(100):
 	pending = [Ant(init) for init in nodes.values()]
