@@ -214,24 +214,26 @@ def apply_evaporation():
 	for k, v in edges.items():
 		v.tau *= 0.9
 
-# Запускаем муравья
-for i in range(1000):
-	init = choice(list(nodes.values()))
-	ant = Ant(init)
-	while True:
-		status = ant.advance()
-		if status == "continue":
-			pass
-		elif status == "stuck":
-			stuck += 1
-			break
-		elif status == "fin":
-			cost.append(ant.cost)
-			break
-		else:
-			assert 0
+for i in range(100):
+	pending = [Ant(init) for init in nodes.values()]
 
-	apply_evaporation()
+	# Ходим
+	while pending:
+		retained = []
+
+		for ant in pending:
+			status = ant.advance()
+			if status == "continue":
+				retained.append(ant)
+			elif status == "stuck":
+				pass
+			elif status == "fin":
+				cost.append(ant.cost)
+			else:
+				assert 0
+
+		pending = retained
+		apply_evaporation()
 
 print("Final cost", ant.cost)
 plt.plot(cost)
