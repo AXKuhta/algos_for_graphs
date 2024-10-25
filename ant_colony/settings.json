@@ -1,0 +1,7 @@
+{
+	"epochs": 1000,
+	"stagnation": 50,
+	"alpha": 1.0,
+	"beta": 1.0,
+	"rho": 0.99
+}

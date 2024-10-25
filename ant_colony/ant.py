@@ -1,5 +1,7 @@
 
 from random import choice, choices, seed
+import json
+import sys
 
 import matplotlib.pyplot as plt
 
@@ -8,10 +10,22 @@ seed(42)
 #
 # Настройки
 #
-alpha = 1.0
-beta = 1.0
-rho = 0.99		# Испарение феромона (больше - медленнее)
+settings = {
+	"epochs": 1000,		# Количество эпох
+	"stagnation": 50,	# Порог раннего выхода при стагнации (меньше - раньше)
+	"alpha": 1.0,
+	"beta": 1.0,
+	"rho": 0.99		# Испарение феромона (больше - медленнее)
+}
 
+with open("settings.json") as f:
+	settings.update(json.load(f))
+
+epochs = settings["epochs"]
+stagnation = settings["stagnation"]
+alpha = settings["alpha"]
+beta = settings["beta"]
+rho = settings["rho"]
 
 #
 # Нода
@@ -56,33 +70,34 @@ edges = {}
 #
 # Загрузка графа
 #
-with open("synthetic.txt") as f:
-	#for line in f:
-	#	break
+def load_from_file(filename):
+	with open(filename) as f:
+		#for line in f:
+		#	break
 
-	for line in f:
-		a, b, w = line.strip().split(",")
-		w = int(w)
+		for line in f:
+			a, b, w = line.strip().split(",")
+			w = int(w)
 
-		if a not in nodes:
-			nodes[a] = Node(a)
-		a = nodes[a]
+			if a not in nodes:
+				nodes[a] = Node(a)
+			a = nodes[a]
 
-		if b not in nodes:
-			nodes[b] = Node(b)
-		b = nodes[b]
+			if b not in nodes:
+				nodes[b] = Node(b)
+			b = nodes[b]
 
-		edge = Edge(
-			cost = w,
-			tau = 0.1,
-			nu = 1/w,
-			a=a,
-			b=b
-		)
+			edge = Edge(
+				cost = w,
+				tau = 0.1,
+				nu = 1/w,
+				a=a,
+				b=b
+			)
 
-		edges[ a, b ] = edge
+			edges[ a, b ] = edge
 
-		a.connected.append( (b, edge) )
+			a.connected.append( (b, edge) )
 
 #
 # Что от нас требуется:
@@ -155,58 +170,69 @@ class Ant:
 		for edge in self.hist:
 			edge.tau += 1/self.cost
 
-# Вести историю стоимости найденых путей
-# И кумулятивного минимума стоимости
-cost_log = []
-min_cost_log = []
-min_cost = 9999
-min_path = None
-
 # Применить испарение
 def apply_evaporation():
 	for k, v in edges.items():
 		v.tau *= rho
 
-# Главный цикл
-# Макс. 1000 перезапусков
-for i in range(1000):
-	pending = [Ant(init) for init in nodes.values()] # Поставить муравья в каждую ноду
+def run():
+	if len(sys.argv) < 2:
+		print("Usage: python3 ant.py 1000.txt")
+		return
 
-	# Ходим
-	while pending:
-		retained = []
+	load_from_file(sys.argv[1])
 
-		for ant in pending:
-			status = ant.advance()
-			if status == "continue":
-				retained.append(ant)
-			elif status == "stuck":
-				pass
-			elif status == "fin":
-				cost_log.append(ant.cost)
+	# Вести историю стоимости найденых путей
+	# И кумулятивного минимума стоимости за эпоху
+	cost_log = []
+	min_cost_x = []
+	min_cost_y = []
+	min_cost = None
+	min_path = None
 
-				if ant.cost < min_cost:
-					min_cost = ant.cost
-					min_path = ant.hist
+	# Главный цикл
+	# Макс. 1000 перезапусков
+	for i in range(epochs):
+		pending = [Ant(init) for init in nodes.values()] # Поставить муравья в каждую ноду
 
-				min_cost_log.append(min_cost)
-			else:
-				assert 0
+		# Ходим
+		while pending:
+			retained = []
 
-		pending = retained
-		apply_evaporation()
+			for ant in pending:
+				status = ant.advance()
+				if status == "continue":
+					retained.append(ant)
+				elif status == "stuck":
+					pass
+				elif status == "fin":
+					cost_log.append(ant.cost)
 
-	# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
-	if len(set(min_cost_log[-500:])) == 1:
-		print("stagnated at", i)
-		break
+					if min_cost is None or ant.cost < min_cost:
+						min_cost = ant.cost
+						min_path = ant.hist
+				else:
+					assert 0
 
-print("Final cost", min_cost)
-print("Final path", min_path)
+			pending = retained
+			apply_evaporation()
 
-plt.figure(dpi=300)
-plt.title("Cost history")
-plt.xlabel("Ant number")
-plt.ylabel("Cumulative min cost")
-plt.plot(min_cost_log)
-plt.show()
+		min_cost_x.append(i)
+		min_cost_y.append(min_cost)
+
+		# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
+		if i >= stagnation and len(set(min_cost_y[-stagnation:])) == 1:
+			print("stagnated at", i)
+			break
+
+	print("Final cost", min_cost)
+	print("Final path", min_path)
+
+	plt.figure(dpi=300)
+	plt.title("Cost history")
+	plt.xlabel("Epoch")
+	plt.ylabel("Cumulative min cost")
+	plt.plot(min_cost_x, min_cost_y)
+	plt.show()
+
+run()
