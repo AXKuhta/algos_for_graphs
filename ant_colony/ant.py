@@ -191,7 +191,6 @@ def run():
 	min_path = None
 
 	# Главный цикл
-	# Макс. 1000 перезапусков
 	for i in range(epochs):
 		pending = [Ant(init) for init in nodes.values()] # Поставить муравья в каждую ноду
 
@@ -220,7 +219,7 @@ def run():
 		min_cost_x.append(i)
 		min_cost_y.append(min_cost)
 
-		# Нет изменения в стоимости последних 500 муравьёв - стагнация - ранний выход
+		# Нет изменений за последние эпохи - стагнация - ранний выход
 		if i >= stagnation and len(set(min_cost_y[-stagnation:])) == 1:
 			print("stagnated at", i)
 			break
