@@ -1,69 +1,84 @@
+from bitmap import Bitmap
 
-w = 7
-h = 6
+class board_state:
+	bitmap = None
+	future = None
+	past = None
 
-def rows(bitmap):
-	for i in range(h):
-		yield bitmap[i*w:i*w+w]
+	utility = None
+	turn = ""
 
-def cols(bitmap):
-	for i in range(w):
-		yield bitmap[i::w]
+	def __init__(self, bitmap, past, turn):
+		self.bitmap = bitmap
+		self.future = []
+		self.past = past
+		self.turn = turn
 
-def pri_diag(bitmap):
-	for i in range(h):
-		yield bitmap[w*i::w+1]
+	# Проверить, является ли состояние победным
+	def test_game_over(self):
+		for row in self.bitmap.rows():
+			if b"xxx" in row:
+				return +1
+			if b"ooo" in row:
+				return -1
 
-	for i in range(1, w):
-		yield bitmap[i::w+1][:w-i]
+		for col in self.bitmap.cols():
+			if b"xxx" in col:
+				return +1
+			if b"ooo" in col:
+				return -1
 
-def sec_diag(bitmap):
-	for i in range(h):
-		yield bitmap[w-1+w*i::w-1]
+		for pri in self.bitmap.pri_diag():
+			if b"xxx" in pri:
+				return +1
+			if b"ooo" in pri:
+				return -1
 
-	for i in range(1, w):
-		yield bitmap[w-1-i::w-1][:w-i]
+		for sec in self.bitmap.sec_diag():
+			if b"xxx" in sec:
+				return +1
+			if b"ooo" in sec:
+				return -1
 
-hor = 	b"......."\
-	b"......."\
-	b"......."\
-	b"......."\
-	b"......."\
-	b"xxxx..."
+		return 0
 
-vert = 	b"......."\
-	b"......."\
-	b"..x...."\
-	b"..x...."\
-	b"..x...."\
-	b"..x...."
+	# Сделать все возможные ходы
+	# Вернёт массив допустимых будущих состояний
+	def explore(self):
+		score = self.test_game_over()
 
-diag =	b"...o..."\
-	b"....o.."\
-	b"x....o."\
-	b".x....o"\
-	b"..x...."\
-	b"...x..."\
+		if score:
+			print("Branch terminated in", score)
+			return []
 
-diag2 =	b"......o"\
-	b"...y.ox"\
-	b"..y.ox."\
-	b".y.ox.."\
-	b"y..x..."\
-	b"......."\
+		for i, v in enumerate(self.bitmap.bitmap):
+			if v != ord("."):
+				continue
 
-print("=== Rows ===")
-for row in rows(hor):
-	print(row)
+			bitmap = self.bitmap.clone()
+			bitmap.bitmap[i] = ord(self.turn)
+			future = board_state(bitmap, self, "x" if self.turn == "o" else "o")
 
-print("=== Cols ===")
-for col in cols(vert):
-	print(col)
+			self.future.append(future)
 
-print("=== Diag ===")
-for trace in pri_diag(diag):
-	print(trace)
+		return self.future
 
-print("=== Diag2 ===")
-for trace in sec_diag(diag2):
-	print(trace)
+
+init_bytes = 	b"..."\
+		b"..."\
+		b"..."
+
+init_bm = Bitmap(init_bytes, 3, 3)
+
+# Пробежка по пространству состояний
+# Держим состояния в очереди
+init = board_state(init_bm, None, "o")
+
+pending = [init]
+
+while len(pending):
+	state = pending.pop()
+	options = state.explore()
+
+	for option in options:
+		pending.append(option)
