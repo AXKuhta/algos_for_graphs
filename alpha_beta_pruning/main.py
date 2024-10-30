@@ -103,5 +103,31 @@ def hoist_utility(init):
 	init.utility_x = sum([x.utility_x for x in init.future])
 	init.utility_o = sum([x.utility_o for x in init.future])
 
+
+def play(loc):
+	if not loc.future:
+		print("Game over")
+		return
+
+	print("Make your move:")
+
+	for i, s in enumerate(loc.future):
+		print(f"=== {i} ===")
+		print(s.bitmap)
+
+	# Человек
+	idx = int(input("> "))
+	loc = loc.future[idx]
+
+	# Компьютер
+	loc = max(loc.future, key=lambda x: x.utility_o)
+
+	print("Computer makes a move:")
+	print(loc.bitmap)
+	input("Press enter")
+
+	play(loc)
+
 explore_states(init)
 hoist_utility(init)
+play(init.future[0])

@@ -47,4 +47,4 @@ class Bitmap:
 			yield bitmap[w-1-i::w-1][:w-i]
 
 	def __str__(self):
-		return "=== bitmap ===\n" + "\n".join([x.decode() for x in self.rows()])
+		return "\n".join([x.decode() for x in self.rows()])
