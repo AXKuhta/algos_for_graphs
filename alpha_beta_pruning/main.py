@@ -7,9 +7,9 @@ class BoardState:
 
 	utility_o = None
 	utility_x = None
-	turn = ""
+	turn = 0
 
-	def __init__(self, bitmap, past, turn):
+	def __init__(self, bitmap, past, turn=0):
 		self.bitmap = bitmap
 		self.future = []
 		self.past = past
@@ -49,8 +49,8 @@ class BoardState:
 		winner = self.test_winner()
 
 		if winner:
-			self.utility_o = 1 if winner == "o" else -1
-			self.utility_x = 1 if winner == "x" else -1
+			self.utility_o = 1/self.turn if winner == "o" else 0
+			self.utility_x = 1/self.turn if winner == "x" else 0
 			#print("Branch terminated in", score)
 			#print(self.bitmap)
 			return []
@@ -59,9 +59,11 @@ class BoardState:
 			if v != ord("."):
 				continue
 
+			player = "x" if self.turn & 1 else "o"
+
 			bitmap = self.bitmap.clone()
-			bitmap.bitmap[i] = ord(self.turn)
-			future = BoardState(bitmap, self, "x" if self.turn == "o" else "o")
+			bitmap.bitmap[i] = ord(player)
+			future = BoardState(bitmap, self, self.turn + 1)
 
 			self.future.append(future)
 
@@ -76,7 +78,7 @@ init_bytes = 	b"..."\
 		b"..."
 
 init_bm = Bitmap(init_bytes, 3, 3)
-init = BoardState(init_bm, None, "o")
+init = BoardState(init_bm, None)
 
 
 # Пробежка по пространству состояний
@@ -95,7 +97,7 @@ def explore_states(init):
 # Больше победных веток - выше полезность
 def hoist_utility(init):
 	for option in init.future:
-		if not option.utility_x:
+		if option.utility_x is None:
 			hoist_utility(option)
 
 	init.utility_x = sum([x.utility_x for x in init.future])
