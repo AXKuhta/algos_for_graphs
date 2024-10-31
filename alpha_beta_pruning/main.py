@@ -79,6 +79,7 @@ class BoardState:
 			if self.turn & 1: # Ход компьютера
 				if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
 					reachable = False # Понятно, что компьютер так не сходит - окрасить эту ветвь будущего красным
+					return "" # А ещё лучше, вообще не показывать её
 
 		class_lst = ["state"]
 
