@@ -71,19 +71,31 @@ class BoardState:
 
 		return self.future
 
-	def html(self, depth=0):
+	def html(self, depth=0, reachable=True):
 		if depth > 5:
 			return ""
 
-		nested = "".join([x.html(depth+1) for x in self.future])
+		if reachable:
+			if self.turn & 1: # Ход компьютера
+				if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
+					reachable = False # Понятно, что компьютер так не сходит - окрасить эту ветвь будущего красным
 
-		return f"<div class=\"state\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
+		class_lst = ["state"]
+
+		if not reachable:
+			class_lst.append("unreachable")
+
+		nested = "".join([x.html(depth+1, reachable) for x in self.future])
+		classes = " ".join(class_lst)
+
+		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
 
 	def draw(self):
 		with open("chart.html", "w") as f:
 			f.write("<!DOCTYPE html>")
 			f.write("<style>div { white-space: pre-wrap; font-family: monospace; font-size: 14px; }</style>")
 			f.write("<style>.state { display: inline-block; margin: 2rem; padding: 2rem; border: 1px solid black; }</style>")
+			f.write("<style>.unreachable { background-color: tomato; }</style>")
 			f.write(self.html())
 
 		webbrowser.open("chart.html")
