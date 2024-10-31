@@ -1,3 +1,5 @@
+import webbrowser
+
 from bitmap import Bitmap
 
 class BoardState:
@@ -69,6 +71,23 @@ class BoardState:
 
 		return self.future
 
+	def html(self, depth=0):
+		if depth > 5:
+			return ""
+
+		nested = "".join([x.html(depth+1) for x in self.future])
+
+		return f"<div class=\"state\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
+
+	def draw(self):
+		with open("chart.html", "w") as f:
+			f.write("<!DOCTYPE html>")
+			f.write("<style>div { white-space: pre-wrap; font-family: monospace; font-size: 14px; }</style>")
+			f.write("<style>.state { display: inline-block; margin: 2rem; padding: 2rem; border: 1px solid black; }</style>")
+			f.write(self.html())
+
+		webbrowser.open("chart.html")
+
 	def __repr__(self):
 		return f"BoardState(utility_x={self.utility_x}, utility_o={self.utility_o})"
 
@@ -121,6 +140,8 @@ def play(loc):
 
 	# Компьютер
 	loc = max(loc.future, key=lambda x: x.utility_o)
+
+	loc.draw()
 
 	print("Computer makes a move:")
 	print(loc.bitmap)
