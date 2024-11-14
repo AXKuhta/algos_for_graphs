@@ -72,11 +72,11 @@ edges = {}
 #
 def load_from_file(filename):
 	with open(filename) as f:
-		#for line in f:
-		#	break
+		for line in f:
+			break
 
 		for line in f:
-			a, b, w = line.strip().split(",")
+			a, b, w = line.strip().split("\t")
 			w = int(w)
 
 			if a not in nodes:
@@ -224,14 +224,17 @@ def run():
 			print("stagnated at", i)
 			break
 
-	print("Final cost", min_cost)
-	print("Final path", min_path)
+	if min_path:
+		print("Final cost", min_cost)
+		print("Final path", min_path)
 
-	plt.figure(dpi=300)
-	plt.title("Cost history")
-	plt.xlabel("Epoch")
-	plt.ylabel("Cumulative min cost")
-	plt.plot(min_cost_x, min_cost_y)
-	plt.show()
+		plt.figure(dpi=300)
+		plt.title("Cost history")
+		plt.xlabel("Epoch")
+		plt.ylabel("Cumulative min cost")
+		plt.plot(min_cost_x, min_cost_y)
+		plt.show()
+	else:
+		print("Error: no cycle found")
 
 run()
