@@ -99,6 +99,19 @@ def load_from_file(filename):
 
 			a.connected.append( (b, edge) )
 
+	#
+	# Проверки на разумность:
+	# - Есть ли ловушки?
+	# - Есть ли абсолютно недостижимые ноды?
+	#
+	for node in nodes.values():
+		assert len(node.connected) > 0, f"node {node} is a trap"
+
+	reachable = set([b for a, b in edges])
+
+	for node in nodes.values():
+		assert node in reachable, f"node {node} is unreachable"
+
 #
 # Что от нас требуется:
 # - Мы муравей
