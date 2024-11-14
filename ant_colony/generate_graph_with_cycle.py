@@ -30,8 +30,10 @@ for i in range(1000):
 			edges[ a, b ] = randint(1, 30)
 			break
 
+print("Source	Target	Weight")
+
 #
 # Вывести
 #
 for (a, b), v in edges.items():
-	print(f"{a},{b},{v}")
+	print(f"{a}\t{b}\t{v}")
