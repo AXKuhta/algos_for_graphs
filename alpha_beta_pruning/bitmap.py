@@ -48,3 +48,49 @@ class Bitmap:
 
 	def __str__(self):
 		return "\n".join([x.decode() for x in self.rows()])
+
+def test():
+	hor = 	b"......."\
+		b"......."\
+		b"......."\
+		b"......."\
+		b"......."\
+		b"xxxx..."
+
+	vert = 	b"......."\
+		b"......."\
+		b"..x...."\
+		b"..x...."\
+		b"..x...."\
+		b"..x...."
+
+	diag =	b"...o..."\
+		b"....o.."\
+		b"x....o."\
+		b".x....o"\
+		b"..x...."\
+		b"...x..."\
+
+	diag2 =	b"......o"\
+		b"...y.ox"\
+		b"..y.ox."\
+		b".y.ox.."\
+		b"y..x..."\
+		b"......."\
+
+	print("=== Rows ===")
+	for row in Bitmap(hor, 7, 6).rows():
+		print(row)
+
+	print("=== Cols ===")
+	for col in Bitmap(vert, 7, 6).cols():
+		print(col)
+
+	print("=== Diag ===")
+	for trace in Bitmap(diag, 7, 6).pri_diag():
+		print(trace)
+
+	print("=== Diag2 ===")
+	for trace in Bitmap(diag2, 7, 6).sec_diag():
+		print(trace)
+
