@@ -79,14 +79,13 @@ class BoardState:
 			if self.turn & 1: # Ход компьютера
 				if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
 					reachable = False # Понятно, что компьютер так не сходит - окрасить эту ветвь будущего красным
-					return "" # А ещё лучше, вообще не показывать её
 
 		class_lst = ["state"]
 
 		if not reachable:
 			class_lst.append("unreachable")
 
-		nested = "".join([x.html(depth+1, reachable) for x in self.future])
+		nested = "<details>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
 		classes = " ".join(class_lst)
 
 		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
