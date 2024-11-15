@@ -11,11 +11,12 @@ class BoardState:
 	utility_x = None
 	turn = 0
 
-	def __init__(self, bitmap, past, turn=0):
+	def __init__(self, bitmap, past=None, turn=0, moved=""):
 		self.bitmap = bitmap
 		self.future = []
 		self.past = past
 		self.turn = turn
+		self.moved = moved
 
 	# Проверить, является ли состояние победным
 	def test_winner(self):
@@ -45,6 +46,21 @@ class BoardState:
 
 		return ""
 
+	def explore_(self, player):
+		futures = []
+
+		for i, v in enumerate(self.bitmap.bitmap):
+			if v != ord("."):
+				continue
+
+			bitmap = self.bitmap.clone()
+			bitmap.bitmap[i] = ord(player)
+			future = BoardState(bitmap, self, self.turn + 1, player)
+
+			futures.append(future)
+
+		return futures
+
 	# Сделать все возможные ходы
 	# Вернёт массив допустимых будущих состояний
 	def explore(self):
@@ -57,17 +73,10 @@ class BoardState:
 			#print(self.bitmap)
 			return []
 
-		for i, v in enumerate(self.bitmap.bitmap):
-			if v != ord("."):
-				continue
-
-			player = "x" if self.turn & 1 else "o"
-
-			bitmap = self.bitmap.clone()
-			bitmap.bitmap[i] = ord(player)
-			future = BoardState(bitmap, self, self.turn + 1)
-
-			self.future.append(future)
+		if self.turn == 0:
+			self.future = self.explore_("x") + self.explore_("o")
+		else:
+			self.future = self.explore_("o" if self.moved == "x" else "x")
 
 		return self.future
 
@@ -76,9 +85,9 @@ class BoardState:
 			return ""
 
 		if reachable:
-			if self.turn & 1: # Ход компьютера
+			if self.turn & 1: # Ход o
 				if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
-					reachable = False # Понятно, что компьютер так не сходит - окрасить эту ветвь будущего красным
+					reachable = False # Понятно, что o так не сходит - окрасить эту ветвь будущего красным
 
 		class_lst = ["state"]
 
@@ -163,4 +172,4 @@ def play(loc):
 
 explore_states(init)
 hoist_utility(init)
-play(init.future[0])
+play(init)
