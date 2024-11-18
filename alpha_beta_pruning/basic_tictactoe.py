@@ -140,10 +140,17 @@ class BoardState:
 		if depth > 5:
 			return ""
 
-		#if reachable:
-		#	if self.turn & 1: # Ход o
-		#		if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
-		#			reachable = False # Понятно, что o так не сходит - окрасить эту ветвь будущего красным
+		# o - минимизатор
+		# x - максимизатор
+		# Подсмотреть в альтернативные вселенные
+		# Покрасить заведомо недостижимые ветки красным (при оптимальных игроках)
+		if reachable:
+			if self.moved == "x": # Ходил x
+				if self.utility < max(self.past.future, key=lambda x: x.utility).utility:
+					reachable = False
+			elif self.moved == "o": # Ходил o
+				if self.utility > min(self.past.future, key=lambda x: x.utility).utility:
+					reachable = False
 
 		class_lst = ["state"]
 
@@ -154,7 +161,6 @@ class BoardState:
 		classes = " ".join(class_lst)
 
 		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility: {self.utility:.3f}</div><div>{nested}</div></div>"
-		#return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
 
 	def draw(self):
 		with open("chart.html", "w") as f:
