@@ -1,3 +1,4 @@
+
 import webbrowser
 
 from bitmap import Bitmap
@@ -9,6 +10,7 @@ class BoardState:
 
 	utility_o = None
 	utility_x = None
+	utility = None
 	turn = 0
 
 	def __init__(self, bitmap, past=None, turn=0, moved=""):
@@ -17,6 +19,60 @@ class BoardState:
 		self.past = past
 		self.turn = turn
 		self.moved = moved
+
+	# Оценить полезность этого конкретного состояния
+	# Возможны два сценария:
+	# - Агент пытается максимизировать только свою полезность
+	#   тогда сразу можно представить плохое поведение
+	#   где он идёт к победе в сторонке
+	#   и игнорирует другого игрока
+	# - Агент пытается максимизировать/минимизировать общую полезность
+	#   тогда он будет мешать другому игроку
+	#
+	# Путь o будет минимизатором, а x - максимизатором
+	# utility = utility_x - utility_o
+	#
+	def estimate_utility(self):
+		weights_x = {
+			10: 	b"x..",
+			10: 	b".x.",
+			10: 	b"..x",
+			100: 	b"xx.",
+			100: 	b".xx",
+			1000: 	b"xxx"
+		}
+
+		weights_o = {
+			10: 	b"o..",
+			10: 	b".o.",
+			10: 	b"..o",
+			100: 	b"oo.",
+			100: 	b".oo",
+			1000: 	b"ooo"
+		}
+
+		utility_x = 0
+		utility_o = 0
+
+		projections = []
+		projections.extend(self.bitmap.rows())
+		projections.extend(self.bitmap.cols())
+		projections.extend(self.bitmap.pri_diag())
+		projections.extend(self.bitmap.sec_diag())
+
+		for k, v in weights_x.items():
+			for projection in projections:
+				if v in projection:
+					utility_x += k
+
+		for k, v in weights_o.items():
+			for projection in projections:
+				if v in projection:
+					utility_o += k
+
+		self.utility_x = utility_x
+		self.utility_o = utility_o
+		self.utility = utility_x - utility_o
 
 	# Проверить, является ли состояние победным
 	def test_winner(self):
@@ -67,10 +123,7 @@ class BoardState:
 		winner = self.test_winner()
 
 		if winner:
-			self.utility_o = 1/self.turn if winner == "o" else 0
-			self.utility_x = 1/self.turn if winner == "x" else 0
-			#print("Branch terminated in", score)
-			#print(self.bitmap)
+			self.estimate_utility()
 			return []
 
 		if self.turn == 0:
@@ -78,16 +131,19 @@ class BoardState:
 		else:
 			self.future = self.explore_("o" if self.moved == "x" else "x")
 
+		if not self.future:
+			self.estimate_utility()
+
 		return self.future
 
 	def html(self, depth=0, reachable=True):
 		if depth > 5:
 			return ""
 
-		if reachable:
-			if self.turn & 1: # Ход o
-				if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
-					reachable = False # Понятно, что o так не сходит - окрасить эту ветвь будущего красным
+		#if reachable:
+		#	if self.turn & 1: # Ход o
+		#		if self.utility_o < max(self.past.future, key=lambda x: x.utility_o).utility_o: # Подсмотреть в альтернативные вселенные
+		#			reachable = False # Понятно, что o так не сходит - окрасить эту ветвь будущего красным
 
 		class_lst = ["state"]
 
@@ -97,7 +153,8 @@ class BoardState:
 		nested = "<details>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
 		classes = " ".join(class_lst)
 
-		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
+		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility: {self.utility:.3f}</div><div>{nested}</div></div>"
+		#return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility x: {self.utility_x:.3f}</div><div>utility o: {self.utility_o:.3f}</div><div>{nested}</div></div>"
 
 	def draw(self):
 		with open("chart.html", "w") as f:
@@ -134,15 +191,19 @@ def explore_states(init):
 			pending.append(option)
 
 # Поднять полезность
-# Больше победных веток - выше полезность
+# o - минимизатор
+# x - максимизатор
 def hoist_utility(init):
 	for option in init.future:
 		if option.utility_x is None:
 			hoist_utility(option)
 
-	init.utility_x = sum([x.utility_x for x in init.future])
-	init.utility_o = sum([x.utility_o for x in init.future])
-
+	if init.moved == "o":
+		init.utility = max([x.utility for x in init.future])
+	elif init.moved == "x":
+		init.utility = min([x.utility for x in init.future])
+	else:
+		pass # Готово
 
 def play(loc):
 	if not loc.future:
@@ -160,7 +221,10 @@ def play(loc):
 	loc = loc.future[idx]
 
 	# Компьютер
-	loc = max(loc.future, key=lambda x: x.utility_o)
+	if loc.moved == "x":
+		loc = min(loc.future, key=lambda x: x.utility)
+	elif loc.moved == "o":
+		loc = max(loc.future, key=lambda x: x.utility)
 
 	loc.draw()
 
