@@ -41,7 +41,7 @@ class Bitmap:
 		h = self.h
 
 		for i in range(h):
-			yield bitmap[w-1+w*i::w-1]
+			yield bitmap[w-1+w*i::w-1][:w-i]
 
 		for i in range(1, w):
 			yield bitmap[w-1-i::w-1][:w-i]
