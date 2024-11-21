@@ -19,6 +19,8 @@ class BoardState:
 		self.past = past
 		self.turn = turn
 		self.moved = moved
+		self.x_appetite = -9999
+		self.o_appetite = +9999
 
 	# Оценить полезность этого конкретного состояния
 	# Возможны два сценария:
@@ -102,6 +104,8 @@ class BoardState:
 
 		return ""
 
+	# Поставить крестик или нолик во всех возможных местах
+	# Возвращает массив вселенных
 	def explore_(self, player):
 		futures = []
 
@@ -118,12 +122,13 @@ class BoardState:
 		return futures
 
 	# Сделать все возможные ходы
-	# Вернёт массив допустимых будущих состояний
+	# Не заходить в ветки где полезность меньше некоторого порога если ходит x (несогласие максимизатора x)
+	# Не заходить в ветки где полезность выше некоторого порога если ходит o (несогласие минимизатора o)
+	# Вернёт что?
 	def explore(self):
 		winner = self.test_winner()
 
 		if winner:
-			self.estimate_utility()
 			return []
 
 		if self.turn == 0:
@@ -131,8 +136,35 @@ class BoardState:
 		else:
 			self.future = self.explore_("o" if self.moved == "x" else "x")
 
-		if not self.future:
-			self.estimate_utility()
+		# Рекурсивный алгоритм
+		# Поиск в глубину
+		for future in self.future:
+			future.estimate_utility()
+			moving = future.moved
+
+			future.x_appetite = self.x_appetite
+			future.o_appetite = self.o_appetite
+
+			# Пропуск если будущее не соответствует аппетитам
+			if moving == "x":
+				if future.utility < self.x_appetite:
+					continue
+			elif moving == "o":
+				if future.utility > self.o_appetite:
+					continue
+			else:
+				assert 0
+
+			# Спуск
+			future.explore()
+
+			# Здесь мы должны обновить аппетиты
+			if moving == "x":
+				if future.utility >= self.x_appetite:
+					self.x_appetite = future.utility
+			elif moving == "o":
+				if future.utility <= self.o_appetite:
+					self.o_appetite = future.utility
 
 		return self.future
 
@@ -182,43 +214,10 @@ init_bytes = 	b"..."\
 
 init_bm = Bitmap(init_bytes, 3, 3)
 init = BoardState(init_bm, None)
-
-
-# Пробежка по пространству состояний
-# Держим состояния в очереди
-def explore_states(init):
-	pending = [init]
-
-	while len(pending):
-		state = pending.pop()
-
-		if state.turn > init.turn + 4:
-			state.estimate_utility()
-			continue
-
-		options = state.explore()
-
-		for option in options:
-			pending.append(option)
-
-# Поднять полезность
-# o - минимизатор
-# x - максимизатор
-def hoist_utility(init):
-	for option in init.future:
-		if option.utility_x is None:
-			hoist_utility(option)
-
-	if init.moved == "o":
-		init.utility = max([x.utility for x in init.future])
-	elif init.moved == "x":
-		init.utility = min([x.utility for x in init.future])
-	else:
-		pass # Готово
+#init.explore()
 
 def play(loc):
-	explore_states(loc)
-	hoist_utility(loc)
+	loc.explore()
 
 	if not loc.future:
 		print("Game over")
@@ -233,6 +232,10 @@ def play(loc):
 	# Человек
 	idx = int(input("> "))
 	loc = loc.future[idx]
+
+	loc.o_appetite = 9999
+	loc.x_appetite = -9999
+	loc.explore()
 
 	# Компьютер
 	if loc.moved == "x":
