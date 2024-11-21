@@ -162,11 +162,16 @@ class BoardState:
 			if moving == "x":
 				if future.utility >= self.x_appetite:
 					self.x_appetite = future.utility
+					self.utility = future.utility
 			elif moving == "o":
 				if future.utility <= self.o_appetite:
 					self.o_appetite = future.utility
+					self.utility = future.utility
 
 		return self.future
+
+	def deep_count(self):
+		return 1 + sum([x.deep_count() for x in self.future])
 
 	def html(self, depth=0, reachable=True):
 		if depth > 5:
@@ -189,7 +194,7 @@ class BoardState:
 		if not reachable:
 			class_lst.append("unreachable")
 
-		nested = "<details>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
+		nested = f"<details><summary>{self.deep_count() - 1} futures</summary>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
 		classes = " ".join(class_lst)
 
 		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility: {self.utility:.3f}</div><div>{nested}</div></div>"
