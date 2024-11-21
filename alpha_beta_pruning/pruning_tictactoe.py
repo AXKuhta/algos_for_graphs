@@ -170,12 +170,13 @@ class BoardState:
 
 		return self.future
 
-	def deep_count(self):
-		return 1 + sum([x.deep_count() for x in self.future])
+	def nodes(self):
+		return 1 + sum([x.nodes() for x in self.future])
+
+	def leaves(self):
+		return sum([x.leaves() for x in self.future]) or 1
 
 	def html(self, depth=0, reachable=True):
-		if depth > 5:
-			return ""
 
 		# o - минимизатор
 		# x - максимизатор
@@ -194,7 +195,7 @@ class BoardState:
 		if not reachable:
 			class_lst.append("unreachable")
 
-		nested = f"<details><summary>{self.deep_count() - 1} futures</summary>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
+		nested = f"<details><summary>{self.leaves()} leaves</summary>" + "".join([x.html(depth+1, reachable) for x in self.future]) + "</details>"
 		classes = " ".join(class_lst)
 
 		return f"<div class=\"{classes}\"><div>{self.bitmap}</div><div>utility: {self.utility:.3f}</div><div>{nested}</div></div>"
