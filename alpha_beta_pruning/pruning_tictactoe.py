@@ -36,21 +36,21 @@ class BoardState:
 	#
 	def estimate_utility(self):
 		weights_x = {
-			10: 	b"x..",
-			10: 	b".x.",
-			10: 	b"..x",
-			100: 	b"xx.",
-			100: 	b".xx",
-			1000: 	b"xxx"
+			b"x..": 10,
+			b".x.": 10,
+			b"..x": 10,
+			b"xx.": 100,
+			b".xx": 100,
+			b"xxx": 1000
 		}
 
 		weights_o = {
-			10: 	b"o..",
-			10: 	b".o.",
-			10: 	b"..o",
-			100: 	b"oo.",
-			100: 	b".oo",
-			1000: 	b"ooo"
+			b"o..": 10,
+			b".o.": 10,
+			b"..o": 10,
+			b"oo.": 100,
+			b".oo": 100,
+			b"ooo": 1000
 		}
 
 		utility_x = 0
@@ -64,13 +64,13 @@ class BoardState:
 
 		for k, v in weights_x.items():
 			for projection in projections:
-				if v in projection:
-					utility_x += k
+				if k in projection:
+					utility_x += v
 
 		for k, v in weights_o.items():
 			for projection in projections:
-				if v in projection:
-					utility_o += k
+				if k in projection:
+					utility_o += v
 
 		self.utility_x = utility_x
 		self.utility_o = utility_o
@@ -206,7 +206,6 @@ class BoardState:
 
 	def __repr__(self):
 		return f"BoardState(utility_x={self.utility_x}, utility_o={self.utility_o})"
-
 
 init_bytes = 	b"..."\
 		b"..."\
