@@ -90,7 +90,7 @@ def load_from_file(filename):
 			edge = Edge(
 				cost = w,
 				tau = 0.1,
-				nu = 1/w,
+				nu = 1/w if w else 999999999,
 				a=a,
 				b=b
 			)
