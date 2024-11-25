@@ -1,0 +1,135 @@
+       
+       
+       
+  .    
+  o    
+..x....
+
+       
+  .    
+  o    
+  x    
+  o    
+..x....
+
+  o    
+  x    
+  o    
+  x    
+  o    
+..x....
+
+  o    
+  x    
+  o    
+  x    
+ .o .  
+.ox.x..
+
+  o    
+  x    
+ .o    
+ ox    
+ xo .  
+.ox.x..
+
+  o    
+ .x    
+ xo    
+ ox    
+ xo .. 
+.ox.xo.
+
+ .o    
+ ox    
+ xo    
+ ox  . 
+ xo .x 
+.ox.xo.
+
+ .o    
+ ox    
+ xo    
+ ox  . 
+.xo .x.
+oox.xox
+
+ oo    
+ ox    
+ xo    
+.ox  . 
+xxo .x.
+oox.xox
+
+ oo    
+ ox  . 
+ xo  o 
+.ox  x 
+xxo .x.
+oox.xox
+
+ oo  o 
+ ox  x 
+ xo  o 
+.ox  x 
+xxo .x.
+oox.xox
+
+ oo  o 
+ ox  x 
+.xo  o 
+oox  x.
+xxo .xx
+oox.xox
+
+.oo  o 
+oox  x 
+xxo  o 
+oox  x.
+xxo .xx
+oox.xox
+
+xoo  o 
+oox  x 
+xxo  o.
+oox  xo
+xxo .xx
+oox.xox
+
+xoo  o 
+oox  x.
+xxo  ox
+oox .xo
+xxo oxx
+oox.xox
+
+xoo  o 
+oox .x.
+xxo oox
+oox xxo
+xxo oxx
+oox.xox
+
+xoo oo 
+oox xx.
+xxo oox
+oox xxo
+xxo oxx
+oox.xox
+
+xoo oo.
+oox xxo
+xxo oox
+oox xxo
+xxo.oxx
+ooxxxox
+
+Final
+
+xoo oo.
+oox xxo
+xxo oox
+oox.xxo
+xxoxoxx
+ooxxxox
+
