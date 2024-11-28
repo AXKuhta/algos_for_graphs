@@ -29,19 +29,22 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		loc.explore()
 
 		# Компьютер
-		if loc.moved == "x":
-			loc = min(loc.future, key=lambda x: x.utility)
-		elif loc.moved == "o":
-			loc = max(loc.future, key=lambda x: x.utility)
+		if loc.future:
+			status = "Computer makes a move"
+			if loc.moved == "x":
+				loc = min(loc.future, key=lambda x: x.utility)
+			elif loc.moved == "o":
+				loc = max(loc.future, key=lambda x: x.utility)
 
-		computer = 	"<div>Computer makes a move</div>"\
+			if not loc.future:
+				status = "The computer won"
+		else:
+			status = "You won!"
+
+		present = 	f"<div>{status}</div>"\
 				"<div class='option'>"\
 				f"<pre>{loc.bitmap}</pre>"\
 				"</div>" if loc.moved else ""
-
-		#loc.x_appetite = -99999
-		#loc.o_appetite = +99999
-		#loc.explore()
 
 		options = []
 
@@ -58,13 +61,15 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 			options.append(option)
 
+		if options:
+			options = ["<div>Make your move</div>"] + options
+
 		response = 	"<!DOCTYPE html>"\
 				"<style>"\
 				"body { font-family: system-ui; font-size: 20px; }"\
 				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
 				"</style>"\
-				f"{computer}"\
-				"<div>Make your move</div>"\
+				f"{present}"\
 				"" + "".join(options)
 
 		self.text_response(response)
