@@ -145,7 +145,6 @@ class BoardState:
 		if winner or depth >= 6:
 			return []
 
-		# Наполнить массив вариантов будущего
 		if self.turn == 0:
 			self.future = self.explore_("x") + self.explore_("o")
 		else:
