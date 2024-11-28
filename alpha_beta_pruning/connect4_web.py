@@ -13,7 +13,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		if self.path == "/":
 			self.handle_index()
 		else:
-			self.text_response(f"Unknown path [{self.path}] [{self.parameters}]")
+			self.text_response(f"Unknown path [{self.path}]", status=HTTPStatus.NOT_FOUND)
 
 	def do_POST(self):
 		length = self.headers.get('content-length')
@@ -88,9 +88,9 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 		self.text_response(response)
 
-	def text_response(self, text):
+	def text_response(self, text, status=HTTPStatus.OK):
 		payload = text.encode()
-		self.send_response(HTTPStatus.OK)
+		self.send_response(status)
 		self.send_header("Content-Length", len(payload))
 		self.end_headers()
 		self.wfile.write(payload)
