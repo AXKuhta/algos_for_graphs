@@ -132,7 +132,6 @@ class BoardState:
 	# Сделать все возможные ходы
 	# Не заходить в ветки где полезность меньше некоторого порога если ходит x (несогласие максимизатора x)
 	# Не заходить в ветки где полезность выше некоторого порога если ходит o (несогласие минимизатора o)
-	# Вернёт что?
 	def explore(self, depth=0):
 		winner = self.test_winner()
 
@@ -220,53 +219,3 @@ class BoardState:
 
 	def __repr__(self):
 		return f"BoardState(utility_x={self.utility_x}, utility_o={self.utility_o})"
-
-"""
-init_bytes = 	b"       "\
-		b"       "\
-		b"       "\
-		b"       "\
-		b"       "\
-		b"......."\
-
-init_bm = Bitmap(init_bytes, 7, 6)
-init = BoardState(init_bm, None)
-#init.explore()
-
-def play(loc):
-	loc.explore()
-
-	if not loc.future:
-		print("Game over")
-		return
-
-	print("Make your move:")
-
-	for i, s in enumerate(loc.future):
-		print(f"=== {i} ===")
-		print(s.bitmap)
-
-	# Человек
-	idx = int(input("> "))
-	loc = loc.future[idx]
-
-	loc.x_appetite = -99999
-	loc.o_appetite = +99999
-	loc.explore()
-
-	# Компьютер
-	if loc.moved == "x":
-		loc = min(loc.future, key=lambda x: x.utility)
-	elif loc.moved == "o":
-		loc = max(loc.future, key=lambda x: x.utility)
-
-	loc.draw()
-
-	print("Computer makes a move:")
-	print(loc.bitmap)
-	input("Press enter")
-
-	play(loc)
-
-play(init)
-"""
