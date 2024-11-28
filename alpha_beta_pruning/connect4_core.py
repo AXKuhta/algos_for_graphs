@@ -136,7 +136,7 @@ class BoardState:
 	def explore(self, depth=0):
 		winner = self.test_winner()
 
-		if winner or depth >= 5:
+		if winner or depth >= 6:
 			return []
 
 		if self.turn == 0:
