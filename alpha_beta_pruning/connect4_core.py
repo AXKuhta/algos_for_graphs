@@ -142,7 +142,7 @@ class BoardState:
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if winner or depth >= 6:
+		if winner or depth >= 7:
 			return []
 
 		if self.turn == 0:

@@ -15,6 +15,28 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		else:
 			self.text_response(f"Unknown path [{self.path}]", status=HTTPStatus.NOT_FOUND)
 
+	def board_as_table(self, board):
+		rows = []
+
+		for line in str(board).split("\n"):
+			cols = []
+			for c in line:
+				if c == "x":
+					classname = "red"
+				elif c == "o":
+					classname = "yellow"
+				else:
+					classname = ""
+				cols.append(f"<td class='{classname}'>")
+				#cols.append(c)
+				cols.append("</td>")
+
+			rows.append("<tr>")
+			rows.append( "".join(cols) )
+			rows.append("</tr>")
+
+		return "<table>" + "".join(rows) + "</table>"
+
 	def do_POST(self):
 		length = self.headers.get('content-length')
 		payload = self.rfile.read( int(length) )
@@ -31,10 +53,10 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		# Компьютер
 		if loc.future:
 			status = "Computer makes a move"
-			if loc.moved == "x":
-				loc = min(loc.future, key=lambda x: x.utility)
-			elif loc.moved == "o":
+			if loc.moved == "o":
 				loc = max(loc.future, key=lambda x: x.utility)
+			else:
+				loc = min(loc.future, key=lambda x: x.utility)
 
 			if not loc.future:
 				status = "The computer won"
@@ -43,7 +65,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 		present = 	f"<div>{status}</div>"\
 				"<div class='option'>"\
-				f"<pre>{loc.bitmap}</pre>"\
+				f"{self.board_as_table(loc.bitmap)}"\
 				"</div>" if loc.moved else ""
 
 		options = []
@@ -51,7 +73,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		for i, s in enumerate(loc.future):
 			option = 	"<div class='option'>"\
 					"<form action='/' method='POST'>"\
-					f"<pre>{s.bitmap}</pre>"\
+					f"{self.board_as_table(s.bitmap)}"\
 					f"<input type='hidden' name='state' value='{s.bitmap.bitmap.decode()}'>"\
 					f"<input type='hidden' name='moved' value='{s.moved}'>"\
 					f"<input type='hidden' name='turn' value='{s.turn}'>"\
@@ -67,6 +89,9 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		response = 	"<!DOCTYPE html>"\
 				"<style>"\
 				"body { font-family: system-ui; font-size: 20px; }"\
+				"td { width: 1rem; height: 1rem; text-align: center; border: 1px solid black; }"\
+				".red { background-color: red; }"\
+				".yellow { background-color: yellow; }"\
 				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
 				"</style>"\
 				f"{present}"\
