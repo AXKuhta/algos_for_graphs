@@ -82,6 +82,89 @@ class BoardState:
 		self.utility_o = utility_o
 		self.utility = utility_x - utility_o
 
+	# Вторая версия функции оценки полезности
+	# Менее читабельная и немного отличается поведением:
+	# старая: x.x.... utility_x=20
+	# новая:  x.x.... utility_x=120
+	# Но работает быстрее
+	def estimate_utility_v2(self):
+		utility_x = 0
+		utility_o = 0
+
+		projections = []
+		projections.extend(self.bitmap.rows())
+		projections.extend(self.bitmap.cols())
+		projections.extend(self.bitmap.pri_diag())
+		projections.extend(self.bitmap.sec_diag())
+
+		d = ord(".")
+		s = ord(" ")
+		x = ord("x")
+		o = ord("o")
+
+		for projection in projections:
+			acc = {
+				d: 0,
+				x: 0,
+				o: 0,
+				s: 0
+			}
+
+			for push in projection[:4]:
+				acc[push] += 1
+
+			if acc[s] == 0:
+				if acc[d] == 3:
+					if acc[x] == 1:
+						utility_x += 10
+					elif acc[o] == 1:
+						utility_o += 10
+				elif acc[d] == 2:
+					if acc[x] == 2:
+						utility_x += 100
+					elif acc[o] == 2:
+						utility_o += 100
+				elif acc[d] == 1:
+					if acc[x] == 3:
+						utility_x += 1000
+					elif acc[o] == 3:
+						utility_o += 1000
+				elif acc[d] == 0:
+					if acc[x] == 4:
+						utility_x += 10000
+					elif acc[o] == 4:
+						utility_o += 10000
+
+			for push, pop in zip(projection[4:], projection):
+				acc[push] += 1
+				acc[pop] -= 1
+
+				if acc[s] == 0:
+					if acc[d] == 3:
+						if acc[x] == 1:
+							utility_x += 10
+						elif acc[o] == 1:
+							utility_o += 10
+					elif acc[d] == 2:
+						if acc[x] == 2:
+							utility_x += 100
+						elif acc[o] == 2:
+							utility_o += 100
+					elif acc[d] == 1:
+						if acc[x] == 3:
+							utility_x += 1000
+						elif acc[o] == 3:
+							utility_o += 1000
+					elif acc[d] == 0:
+						if acc[x] == 4:
+							utility_x += 10000
+						elif acc[o] == 4:
+							utility_o += 10000
+
+		self.utility_x = utility_x
+		self.utility_o = utility_o
+		self.utility = utility_x - utility_o
+
 	# Проверить, является ли состояние победным
 	def test_winner(self):
 		for row in self.bitmap.rows():
@@ -153,7 +236,7 @@ class BoardState:
 		# Оценить варианты будущего
 		# Поиск в глубину
 		for future in self.future:
-			future.estimate_utility()
+			future.estimate_utility_v2()
 			moving = future.moved
 
 			future.x_appetite = self.x_appetite
@@ -227,3 +310,13 @@ class BoardState:
 
 	def __repr__(self):
 		return f"BoardState(utility_x={self.utility_x}, utility_o={self.utility_o})"
+
+bm_init = 	b"       "\
+		b"       "\
+		b"       "\
+		b"       "\
+		b". .    "\
+		b"x.x...."\
+
+bm = Bitmap(bm_init, 7, 6)
+state = BoardState(bm)
