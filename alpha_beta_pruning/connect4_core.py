@@ -103,62 +103,86 @@ class BoardState:
 		o = ord("o")
 
 		for projection in projections:
-			acc = {
-				d: 0,
-				x: 0,
-				o: 0,
-				s: 0
-			}
+			acc_d = 0
+			acc_x = 0
+			acc_o = 0
+			acc_s = 0
 
 			for push in projection[:4]:
-				acc[push] += 1
+				if push == s:
+					acc_s += 1
+				elif push == d:
+					acc_d += 1
+				elif push == x:
+					acc_x += 1
+				else:
+					acc_o += 1
 
-			if acc[s] == 0:
-				if acc[d] == 3:
-					if acc[x] == 1:
+			if acc_s == 0:
+				if acc_d == 3:
+					if acc_x == 1:
 						utility_x += 10
-					elif acc[o] == 1:
+					elif acc_o == 1:
 						utility_o += 10
-				elif acc[d] == 2:
-					if acc[x] == 2:
+				elif acc_d == 2:
+					if acc_x == 2:
 						utility_x += 100
-					elif acc[o] == 2:
+					elif acc_o == 2:
 						utility_o += 100
-				elif acc[d] == 1:
-					if acc[x] == 3:
+				elif acc_d == 1:
+					if acc_x == 3:
 						utility_x += 1000
-					elif acc[o] == 3:
+					elif acc_o == 3:
 						utility_o += 1000
-				elif acc[d] == 0:
-					if acc[x] == 4:
+				elif acc_d == 0:
+					if acc_x == 4:
 						utility_x += 10000
-					elif acc[o] == 4:
+					elif acc_o == 4:
 						utility_o += 10000
 
 			for push, pop in zip(projection[4:], projection):
-				acc[push] += 1
-				acc[pop] -= 1
+				#for i in range(len(projection) - 4):
+				#	pop = projection[i]
+				#	push = projection[i + 4]
 
-				if acc[s] == 0:
-					if acc[d] == 3:
-						if acc[x] == 1:
+				if push == s:
+					acc_s += 1
+				elif push == d:
+					acc_d += 1
+				elif push == x:
+					acc_x += 1
+				else:
+					acc_o += 1
+
+				if pop == s:
+					acc_s -= 1
+				elif pop == d:
+					acc_d -= 1
+				elif pop == x:
+					acc_x -= 1
+				else:
+					acc_o -= 1
+
+				if acc_s == 0:
+					if acc_d == 3:
+						if acc_x == 1:
 							utility_x += 10
-						elif acc[o] == 1:
+						elif acc_o == 1:
 							utility_o += 10
-					elif acc[d] == 2:
-						if acc[x] == 2:
+					elif acc_d == 2:
+						if acc_x == 2:
 							utility_x += 100
-						elif acc[o] == 2:
+						elif acc_o == 2:
 							utility_o += 100
-					elif acc[d] == 1:
-						if acc[x] == 3:
+					elif acc_d == 1:
+						if acc_x == 3:
 							utility_x += 1000
-						elif acc[o] == 3:
+						elif acc_o == 3:
 							utility_o += 1000
-					elif acc[d] == 0:
-						if acc[x] == 4:
+					elif acc_d == 0:
+						if acc_x == 4:
 							utility_x += 10000
-						elif acc[o] == 4:
+						elif acc_o == 4:
 							utility_o += 10000
 
 		self.utility_x = utility_x
