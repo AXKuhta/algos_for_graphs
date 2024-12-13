@@ -145,7 +145,7 @@ void sec(
 	}
 }
 
-void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
+int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 	struct acc_t {
 		int x;
 		int o;
@@ -276,4 +276,8 @@ void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) 
 	pri(bitmap, w, h, span, push, push_pop, flush);
 	printf("sec:\n");
 	sec(bitmap, w, h, span, push, push_pop, flush);
+
+	// x - максимизатор
+	// o - минимизатор
+	return utility.x - utility.o;
 }

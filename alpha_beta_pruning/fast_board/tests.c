@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <assert.h>
 #include <stdio.h>
 
 // =====================================================================================
@@ -44,7 +45,7 @@ void sec(
 	void flush(void)
 );
 
-void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span);
+int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span);
 // =====================================================================================
 // Тесты
 // =====================================================================================
@@ -164,17 +165,34 @@ void test_estimate_sec() {
 	estimate_utility_v2b(diag2, 7, 6, 4);
 }
 
-void test_estimate_utility() {
-	printf(" === test_estimate_sec ===\n");
+void test_estimate_utility_1() {
+	printf(" === test_estimate_utility_1 ===\n");
 
-	const char* diag2 = 	"......."
+	const char* board = 	"......."
 				"......."
 				"......."
 				"......."
 				"......."
 				"......x";
 
-	estimate_utility_v2b(diag2, 7, 6, 4);
+	int utility = estimate_utility_v2b(board, 7, 6, 4);
+
+	assert(utility == 30);
+}
+
+void test_estimate_utility_2() {
+	printf(" === test_estimate_utility_2 ===\n");
+
+	const char* board = 	"......."
+				"......."
+				"......."
+				"......."
+				"......."
+				"o.....x";
+
+	int utility = estimate_utility_v2b(board, 7, 6, 4);
+
+	assert(utility == 0);
 }
 
 int main() {
@@ -187,5 +205,6 @@ int main() {
 	test_estimate_cols();
 	test_estimate_pri();
 	test_estimate_sec();
-	test_estimate_utility();
+	test_estimate_utility_1();
+	test_estimate_utility_2();
 }
