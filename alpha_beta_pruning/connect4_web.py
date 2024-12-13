@@ -61,20 +61,44 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 		doc = [opener]
 
-		# Компьютер
-		if loc.future:
-			doc.append("<div>Computer has options:</div>")
-
+		def recurse_options(loc):
 			options = []
 
 			for i, s in enumerate(loc.future):
 				option = 	"<div class='option'>"\
 						f"{self.board_as_table(s.bitmap)}"\
+						f"Hoisted: {s.utility}<br>"\
+						f"Utility: {s.base_utility}"\
+						"<details>"\
+						f"{recurse_options(s)}"\
+						"</details>"\
+						"</div>"
+
+				options.append(option)
+
+			return "".join(options)
+
+
+		# Компьютер
+		if loc.future:
+			doc.append("<div>Computer has options:</div>")
+
+			doc.append(recurse_options(loc))
+
+			"""
+			options = []
+
+			for i, s in enumerate(loc.future):
+				option = 	"<div class='option'>"\
+						f"{self.board_as_table(s.bitmap)}"\
+						f"Hoisted: {s.utility}<br>"\
+						f"Utility: {s.base_utility}"\
 						"</div>"
 
 				options.append(option)
 
 			doc.extend(options)
+			"""
 
 			doc.append("<div>Computer makes a move:</div>")
 

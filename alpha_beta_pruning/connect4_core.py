@@ -252,7 +252,7 @@ class BoardState:
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if winner or depth >= 6:
+		if winner or depth >= 2:
 			return []
 
 		if self.turn == 0:
@@ -263,17 +263,18 @@ class BoardState:
 		# Оценить варианты будущего
 		# Поиск в глубину
 		for future in self.future:
-			future.estimate_utility_v2()
+			#future.estimate_utility_v2()
 			moving = future.moved
 
-			utility_fast = lib.estimate_utility_v2b(
+			future.base_utility = lib.estimate_utility_v2b(
 				bytes(future.bitmap.bitmap),
 				future.bitmap.w,
 				future.bitmap.h,
 				4
 			)
 
-			assert future.utility == utility_fast
+			#assert future.utility == utility_fast
+			future.utility = future.base_utility
 
 			future.x_appetite = self.x_appetite
 			future.o_appetite = self.o_appetite
