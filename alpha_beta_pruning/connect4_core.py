@@ -12,6 +12,7 @@ class BoardState:
 	utility_o = None
 	utility_x = None
 	utility = None
+	winner = 0
 	turn = 0
 
 	def __init__(self, bitmap, past=None, turn=0, moved=""):
@@ -192,6 +193,28 @@ class BoardState:
 		self.utility_o = utility_o
 		self.utility = utility_x - utility_o
 
+	# V3: внешняя оценочная функция на C
+	def estimate_utility_v3(self):
+		utility_x = bytes(4) # Память для возвратных значений
+		utility_o = bytes(4) # не надо так делать - bytes вообще-то read-only
+		winner = bytes(1)
+
+		lib.estimate_utility_v2c(
+			bytes(self.bitmap.bitmap),
+			self.bitmap.w,
+			self.bitmap.h,
+			4,
+			utility_x,
+			utility_o,
+			winner
+		)
+
+		self.utility_x = int.from_bytes(utility_x, "little")
+		self.utility_o = int.from_bytes(utility_o, "little")
+		self.utility = self.utility_x - self.utility_o
+		self.base_utility = self.utility
+		self.winner = winner[0]
+
 	# Проверить, является ли состояние победным
 	def test_winner(self):
 		for row in self.bitmap.rows():
@@ -248,11 +271,10 @@ class BoardState:
 	# Пороги обновляются, когда x или o обнаружил более благоприятный для себя вариант
 	#
 	def explore(self, depth=0):
-		winner = self.test_winner()
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if winner or depth >= 7:
+		if self.winner or depth >= 7:
 			return []
 
 		# Небольшой костыль
@@ -272,18 +294,9 @@ class BoardState:
 				self.o_appetite = +99999
 				continue
 
-			#future.estimate_utility_v2()
 			moving = future.moved
 
-			future.base_utility = lib.estimate_utility_v2b(
-				bytes(future.bitmap.bitmap),
-				future.bitmap.w,
-				future.bitmap.h,
-				4
-			)
-
-			#assert future.utility == utility_fast
-			future.utility = future.base_utility
+			future.estimate_utility_v3()
 
 			future.x_appetite = self.x_appetite
 			future.o_appetite = self.o_appetite

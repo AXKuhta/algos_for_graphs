@@ -144,7 +144,15 @@ void sec(
 	}
 }
 
-int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
+void estimate_utility_v2c(
+	const char* bitmap,
+	uint32_t w,
+	uint32_t h,
+	int span,
+	int* utility_x,
+	int* utility_o,
+	char* winner
+) {
 	struct acc_t {
 		int x;
 		int o;
@@ -189,8 +197,10 @@ int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 			case 0:
 				if (acc.x == 4) {
 					utility.x += 10000;
+					*winner = 'x';
 				} else if (acc.o == 4) {
 					utility.o += 10000;
+					*winner = 'o';
 				}
 				break;
 			default:
@@ -270,7 +280,18 @@ int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 	pri(bitmap, w, h, span, push, push_pop, flush);
 	sec(bitmap, w, h, span, push, push_pop, flush);
 
+	*utility_x = utility.x;
+	*utility_o = utility.o;
+}
+
+int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
+	int utility_x;
+	int utility_o;
+	char winner;
+
+	estimate_utility_v2c(bitmap, w, h, span, &utility_x, &utility_o, &winner);
+
 	// x - максимизатор
 	// o - минимизатор
-	return utility.x - utility.o;
+	return utility_x - utility_o;
 }
