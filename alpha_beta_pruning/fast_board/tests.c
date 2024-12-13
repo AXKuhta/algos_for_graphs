@@ -195,6 +195,21 @@ void test_estimate_utility_2() {
 	assert(utility == 0);
 }
 
+void test_estimate_utility_3() {
+	printf(" === test_estimate_utility_2 ===\n");
+
+	const char* board = 	"       "
+				"       "
+				"       "
+				"   .   "
+				"  .x   "
+				"..oo...";
+
+	int utility = estimate_utility_v2b(board, 7, 6, 4);
+
+	printf("Utility: %d\n", utility);
+}
+
 int main() {
 	test_rows_1();
 	test_cols_1();
@@ -207,4 +222,5 @@ int main() {
 	test_estimate_sec();
 	test_estimate_utility_1();
 	test_estimate_utility_2();
+	test_estimate_utility_3();
 }

@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <assert.h>
-#include <stdio.h>
 
 // Нужно rows, cols - размер не меняется, всё просто
 // Нужно pri, sec - размер меняется, сложнее
@@ -158,12 +157,11 @@ int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 		int o;
 	} utility = {0};
 
-	void dump() {
-		printf("x=%d o=%d d=%d s=%d u.x=%d u.o=%d\n", acc.x, acc.o, acc.d, acc.s, utility.x, utility.o);
-	}
+	//void dump() {
+	//	printf("x=%d o=%d d=%d s=%d u.x=%d u.o=%d\n", acc.x, acc.o, acc.d, acc.s, utility.x, utility.o);
+	//}
 
 	void step() {
-		dump();
 		switch (acc.d) {
 			case 4:
 				break;
@@ -265,16 +263,11 @@ int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 		acc.o = 0;
 		acc.d = 0;
 		acc.s = 0;
-		printf("===\n");
 	}
 
-	printf("rows:\n");
 	rows(bitmap, w, h, span, push, push_pop, flush);
-	printf("cols:\n");
 	cols(bitmap, w, h, span, push, push_pop, flush);
-	printf("pri:\n");
 	pri(bitmap, w, h, span, push, push_pop, flush);
-	printf("sec:\n");
 	sec(bitmap, w, h, span, push, push_pop, flush);
 
 	// x - максимизатор
