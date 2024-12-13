@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <assert.h>
+#include <stdio.h>
 
 // Нужно rows, cols - размер не меняется, всё просто
 // Нужно pri, sec - размер меняется, сложнее
@@ -18,12 +19,12 @@
 // push_pop	добавить и убрать из окна
 // flush	закончить строку
 void rows(
-	const uint8_t* bitmap,
+	const char* bitmap,
 	uint32_t w,
 	uint32_t h,
 	uint32_t span,
-	void push(uint8_t),
-	void push_pop(uint8_t, uint8_t),
+	void push(char),
+	void push_pop(char, char),
 	void flush(void)
 ) {
 	for (uint32_t i = 0; i < h; i++) {
@@ -43,12 +44,12 @@ void rows(
 
 // Пробежка по столбцам
 void cols(
-	const uint8_t* bitmap,
+	const char* bitmap,
 	uint32_t w,
 	uint32_t h,
 	uint32_t span,
-	void push(uint8_t),
-	void push_pop(uint8_t, uint8_t),
+	void push(char),
+	void push_pop(char, char),
 	void flush(void)
 ) {
 	for (uint32_t j = 0; j < w; j++) {
@@ -68,12 +69,12 @@ void cols(
 
 // Пробежка по главной диагонали
 void pri(
-	const uint8_t* bitmap,
+	const char* bitmap,
 	uint32_t w,
 	uint32_t h,
 	uint32_t span,
-	void push(uint8_t),
-	void push_pop(uint8_t, uint8_t),
+	void push(char),
+	void push_pop(char, char),
 	void flush(void)
 ) {
 	for (uint32_t i = 0; i < h; i++) {
@@ -107,12 +108,12 @@ void pri(
 
 // Пробежка по обратной диагонали
 void sec(
-	const uint8_t* bitmap,
+	const char* bitmap,
 	uint32_t w,
 	uint32_t h,
 	uint32_t span,
-	void push(uint8_t),
-	void push_pop(uint8_t, uint8_t),
+	void push(char),
+	void push_pop(char, char),
 	void flush(void)
 ) {
 	for (uint32_t i = 0; i < h; i++) {
@@ -144,22 +145,92 @@ void sec(
 	}
 }
 
-/*
-int estimate_utility_v2b(uint8_t* bitmap, uint32_t w, uint32_t h) {
+void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
+	struct acc_t {
+		int x;
+		int o;
+		int d;
+		int s;
+	} acc = {0};
+
+	void dump() {
+		printf("x=%d o=%d d=%d s=%d\n", acc.x, acc.o, acc.d, acc.s);
+	}
+
+	void push(char x) {
+		switch (x) {
+			case 'x':
+				acc.x++;
+				break;
+			case 'o':
+				acc.o++;
+				break;
+			case '.':
+				acc.d++;
+				break;
+			case ' ':
+				acc.s++;
+				break;
+			default:
+				assert(0);
+		}
+
+		if (acc.x + acc.o + acc.d + acc.s >= 4)
+			dump();
+	}
+
+	void push_pop(char a, char b) {
+		switch (a) {
+			case 'x':
+				acc.x++;
+				break;
+			case 'o':
+				acc.o++;
+				break;
+			case '.':
+				acc.d++;
+				break;
+			case ' ':
+				acc.s++;
+				break;
+			default:
+				assert(0);
+		}
+
+		switch (b) {
+			case 'x':
+				acc.x--;
+				break;
+			case 'o':
+				acc.o--;
+				break;
+			case '.':
+				acc.d--;
+				break;
+			case ' ':
+				acc.s--;
+				break;
+			default:
+				assert(0);
+		}
+
+		dump();
+	}
+
+	void flush() {
+		acc.x = 0;
+		acc.o = 0;
+		acc.d = 0;
+		acc.s = 0;
+		printf("===\n");
+	}
+
+	printf("rows:\n");
+	rows(bitmap, w, h, span, push, push_pop, flush);
+	printf("cols:\n");
+	cols(bitmap, w, h, span, push, push_pop, flush);
+	printf("pri:\n");
+	pri(bitmap, w, h, span, push, push_pop, flush);
+	printf("sec:\n");
+	sec(bitmap, w, h, span, push, push_pop, flush);
 }
-
-struct acc_t {
-	int x;
-	int o;
-	int d;
-	int s;
-} acc = {0};
-
-static void push(uint8_t value) {
-
-}
-
-static void pop(uint8_t value) {
-
-}
-*/
