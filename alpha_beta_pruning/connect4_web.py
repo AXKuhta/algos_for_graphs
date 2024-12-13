@@ -50,23 +50,49 @@ class Connect4Handler(BaseHTTPRequestHandler):
 		loc = BoardState(loc_bm, None, turn, moved)
 		loc.explore()
 
+		opener = 	"<!DOCTYPE html>"\
+				"<style>"\
+				"body { font-family: system-ui; font-size: 20px; }"\
+				"td { width: 1rem; height: 1rem; text-align: center; border: 1px solid black; }"\
+				".red { background-color: red; }"\
+				".yellow { background-color: yellow; }"\
+				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
+				"</style>"
+
+		doc = [opener]
+
 		# Компьютер
 		if loc.future:
-			status = "Computer makes a move"
+			doc.append("<div>Computer has options:</div>")
+
+			options = []
+
+			for i, s in enumerate(loc.future):
+				option = 	"<div class='option'>"\
+						f"{self.board_as_table(s.bitmap)}"\
+						"</div>"
+
+				options.append(option)
+
+			doc.extend(options)
+
+			doc.append("<div>Computer makes a move:</div>")
+
 			if loc.moved == "o":
 				loc = max(loc.future, key=lambda x: x.utility)
 			else:
 				loc = min(loc.future, key=lambda x: x.utility)
 
 			if not loc.future:
-				status = "The computer won"
+				doc.append("<div>The computer won</div>")
 		else:
-			status = "You won!"
+			doc.append("<div>You won</div>")
 
-		present = 	f"<div>{status}</div>"\
-				"<div class='option'>"\
+		present = 	"<div class='option'>"\
 				f"{self.board_as_table(loc.bitmap)}"\
 				"</div>" if loc.moved else ""
+
+		doc.append(present)
 
 		options = []
 
@@ -83,21 +109,10 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 			options.append(option)
 
-		if options:
-			options = ["<div>Make your move</div>"] + options
+		doc.append("<div>Make your move</div>")
+		doc.extend(options)
 
-		response = 	"<!DOCTYPE html>"\
-				"<style>"\
-				"body { font-family: system-ui; font-size: 20px; }"\
-				"td { width: 1rem; height: 1rem; text-align: center; border: 1px solid black; }"\
-				".red { background-color: red; }"\
-				".yellow { background-color: yellow; }"\
-				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
-				"</style>"\
-				f"{present}"\
-				"" + "".join(options)
-
-		self.text_response(response)
+		self.text_response("".join(doc))
 
 	def handle_index(self):
 		init_state = 	"       "\
