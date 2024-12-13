@@ -164,6 +164,19 @@ void test_estimate_sec() {
 	estimate_utility_v2b(diag2, 7, 6, 4);
 }
 
+void test_estimate_utility() {
+	printf(" === test_estimate_sec ===\n");
+
+	const char* diag2 = 	"......."
+				"......."
+				"......."
+				"......."
+				"......."
+				"......x";
+
+	estimate_utility_v2b(diag2, 7, 6, 4);
+}
+
 int main() {
 	test_rows_1();
 	test_cols_1();
@@ -174,4 +187,5 @@ int main() {
 	test_estimate_cols();
 	test_estimate_pri();
 	test_estimate_sec();
+	test_estimate_utility();
 }

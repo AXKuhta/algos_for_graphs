@@ -153,8 +153,51 @@ void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) 
 		int s;
 	} acc = {0};
 
+	struct utility_t {
+		int x;
+		int o;
+	} utility = {0};
+
 	void dump() {
-		printf("x=%d o=%d d=%d s=%d\n", acc.x, acc.o, acc.d, acc.s);
+		printf("x=%d o=%d d=%d s=%d u.x=%d u.o=%d\n", acc.x, acc.o, acc.d, acc.s, utility.x, utility.o);
+	}
+
+	void step() {
+		dump();
+		switch (acc.d) {
+			case 4:
+				break;
+			case 3:
+				if (acc.x == 1) {
+					utility.x += 10;
+				} else if (acc.o == 1) {
+					utility.o += 10;
+				}
+				break;
+			case 2:
+				if (acc.x == 2) {
+					utility.x += 100;
+				} else if (acc.o == 2) {
+					utility.o += 100;
+				}
+				break;
+			case 1:
+				if (acc.x == 3) {
+					utility.x += 1000;
+				} else if (acc.o == 3) {
+					utility.o += 1000;
+				}
+				break;
+			case 0:
+				if (acc.x == 4) {
+					utility.x += 10000;
+				} else if (acc.o == 4) {
+					utility.o += 10000;
+				}
+				break;
+			default:
+				assert(0);
+		}
 	}
 
 	void push(char x) {
@@ -176,7 +219,7 @@ void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) 
 		}
 
 		if (acc.x + acc.o + acc.d + acc.s >= 4)
-			dump();
+			step();
 	}
 
 	void push_pop(char a, char b) {
@@ -214,7 +257,7 @@ void estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) 
 				assert(0);
 		}
 
-		dump();
+		step();
 	}
 
 	void flush() {
