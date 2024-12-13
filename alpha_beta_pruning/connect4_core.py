@@ -252,17 +252,26 @@ class BoardState:
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if winner or depth >= 2:
+		if winner or depth >= 3:
 			return []
 
+		# Небольшой костыль
+		# Сброс альфа и бета значений когда начинаем оценивать за другого игрока
+		sentinel = object()
+
 		if self.turn == 0:
-			self.future = self.explore_("x") + self.explore_("o")
+			self.future = self.explore_("x") + [sentinel] + self.explore_("o")
 		else:
 			self.future = self.explore_("o" if self.moved == "x" else "x")
 
 		# Оценить варианты будущего
 		# Поиск в глубину
 		for future in self.future:
+			if future == sentinel:
+				self.x_appetite = -99999
+				self.o_appetite = +99999
+				continue
+
 			#future.estimate_utility_v2()
 			moving = future.moved
 
@@ -302,6 +311,9 @@ class BoardState:
 				if future.utility <= self.o_appetite:
 					self.o_appetite = future.utility
 					self.utility = future.utility
+
+		if self.turn == 0:
+			self.future.remove(sentinel)
 
 		return self.future
 

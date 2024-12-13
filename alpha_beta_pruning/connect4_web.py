@@ -70,6 +70,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 						f"Hoisted: {s.utility}<br>"\
 						f"Utility: {s.base_utility}"\
 						"<details>"\
+						f"<summary>Futures: {len(s.future)}</summary>"\
 						f"{recurse_options(s)}"\
 						"</details>"\
 						"</div>"
@@ -101,6 +102,8 @@ class Connect4Handler(BaseHTTPRequestHandler):
 			"""
 
 			doc.append("<div>Computer makes a move:</div>")
+
+			loc.future = filter(lambda x: x.moved == "o", loc.future)
 
 			if loc.moved == "o":
 				loc = max(loc.future, key=lambda x: x.utility)
