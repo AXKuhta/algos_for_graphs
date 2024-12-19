@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <assert.h>
+#include <stdio.h>
 
 // Нужно rows, cols - размер не меняется, всё просто
 // Нужно pri, sec - размер меняется, сложнее
@@ -66,6 +67,9 @@ void cols(
 	}
 }
 
+#define PRI_IDX_A (i*w + j*w + j)
+#define PRI_IDX_B (i*w + j + i)
+
 // Пробежка по главной диагонали
 void pri(
 	const char* bitmap,
@@ -77,13 +81,13 @@ void pri(
 	void flush(void)
 ) {
 	for (uint32_t i = 0; i < h; i++) {
-		for (uint32_t j = 0; i*w + j*w + j < w*h; j++) {
+		for (uint32_t j = 0; j < w && j < h-i; j++) {
 			if (j < span) {
-				push( bitmap[i*w + j*w + j] );
+				push( bitmap[PRI_IDX_A] );
 			} else {
 				push_pop(
-					bitmap[i*w + j*w + j],
-					bitmap[i*w + j*w + j - span*w - span]
+					bitmap[PRI_IDX_A],
+					bitmap[PRI_IDX_A - span*w - span]
 				);
 			}
 		}
@@ -91,19 +95,22 @@ void pri(
 	}
 
 	for (uint32_t j = 1; j < w; j++) {
-		for (uint32_t i = 0; i < h-j+1; i++) {
+		for (uint32_t i = 0; i < h && i < w-j; i++) {
 			if (i < span) {
-				push( bitmap[i*w + j + i] );
+				push( bitmap[PRI_IDX_B] );
 			} else {
 				push_pop(
-					bitmap[i*w + j + i],
-					bitmap[i*w + j + i - span*w - span]
+					bitmap[PRI_IDX_B],
+					bitmap[PRI_IDX_B - span*w - span]
 				);
 			}
 		}
 		flush();
 	}
 }
+
+#define SEC_IDX_A (w - 1 + i*w + j*w - j)
+#define SEC_IDX_B (w - 1 + i*w - j - i)
 
 // Пробежка по обратной диагонали
 void sec(
@@ -116,13 +123,13 @@ void sec(
 	void flush(void)
 ) {
 	for (uint32_t i = 0; i < h; i++) {
-		for (uint32_t j = 0; i*w + j*w + j < w*h; j++) {
+		for (uint32_t j = 0; j < w && j < h-i; j++) {
 			if (j < span) {
-				push( bitmap[w - 1 + i*w + j*w - j] );
+				push( bitmap[SEC_IDX_A] );
 			} else {
 				push_pop(
-					bitmap[w - 1 + i*w + j*w - j],
-					bitmap[w - 1 + i*w + j*w - j - span*w + span]
+					bitmap[SEC_IDX_A],
+					bitmap[SEC_IDX_A - span*w + span]
 				);
 			}
 		}
@@ -130,13 +137,13 @@ void sec(
 	}
 
 	for (uint32_t j = 1; j < w; j++) {
-		for (uint32_t i = 0; i < h-j+1; i++) {
+		for (uint32_t i = 0; i < h && i < w-j; i++) {
 			if (i < span) {
-				push( bitmap[w - 1 + i*w - j - i] );
+				push( bitmap[SEC_IDX_B] );
 			} else {
 				push_pop(
-					bitmap[w - 1 + i*w - j - i],
-					bitmap[w - 1 + i*w - j - i - span*w + span]
+					bitmap[SEC_IDX_B],
+					bitmap[SEC_IDX_B - span*w + span]
 				);
 			}
 		}
@@ -245,6 +252,7 @@ void estimate_utility_v2c(
 				acc.s++;
 				break;
 			default:
+				printf("ee %c.\n", a);
 				assert(0);
 		}
 
@@ -275,9 +283,16 @@ void estimate_utility_v2c(
 		acc.s = 0;
 	}
 
+	printf("rows\n");
 	rows(bitmap, w, h, span, push, push_pop, flush);
+
+	printf("cols\n");
 	cols(bitmap, w, h, span, push, push_pop, flush);
+
+	printf("pri\n");
 	pri(bitmap, w, h, span, push, push_pop, flush);
+
+	printf("sec\n");
 	sec(bitmap, w, h, span, push, push_pop, flush);
 
 	*utility_x = utility.x;

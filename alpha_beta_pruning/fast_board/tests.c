@@ -62,7 +62,7 @@ static void flush_printf(void) {
 }
 
 void test_rows_1() {
-	printf(" === test_rows_1 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* hor =	"......."
 				"......."
@@ -75,7 +75,7 @@ void test_rows_1() {
 }
 
 void test_cols_1() {
-	printf(" === test_cols_1 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* vert =	"......."
 				"......."
@@ -88,7 +88,7 @@ void test_cols_1() {
 }
 
 void test_pri_1() {
-	printf(" === test_pri_1 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* diag =	"...o..."
 				"....o.."
@@ -100,8 +100,20 @@ void test_pri_1() {
 	pri(diag, 7, 6, 4, push_printf, push_pop_printf, flush_printf);
 }
 
+void test_pri_2() {
+	printf(" === %s ===\n", __func__);
+
+	const char* diag =	"0xyz9"
+				"u0xyz"
+				"vu0xy"
+				"wvu0x"
+				"1wvu0";
+
+	pri(diag, 5, 5, 4, push_printf, push_pop_printf, flush_printf);
+}
+
 void test_sec_1() {
-	printf(" === test_sec_1 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* diag2 = 	"......o"
 				"...y.ox"
@@ -113,8 +125,20 @@ void test_sec_1() {
 	sec(diag2, 7, 6, 4, push_printf, push_pop_printf, flush_printf);
 }
 
+void test_sec_2() {
+	printf(" === %s ===\n", __func__);
+
+	const char* diag2 =	"9zyx0"
+				"zyx0u"
+				"yx0uv"
+				"x0uvw"
+				"0uvw1";
+
+	sec(diag2, 5, 5, 4, push_printf, push_pop_printf, flush_printf);
+}
+
 void test_estimate_rows() {
-	printf(" === test_estimate_rows ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* hor =	"......."
 				"......."
@@ -127,7 +151,7 @@ void test_estimate_rows() {
 }
 
 void test_estimate_cols() {
-	printf(" === test_estimate_cols ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* vert =	"......."
 				"......."
@@ -140,7 +164,7 @@ void test_estimate_cols() {
 }
 
 void test_estimate_pri() {
-	printf(" === test_estimate_pri ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* diag =	"...o..."
 				"....o.."
@@ -153,7 +177,7 @@ void test_estimate_pri() {
 }
 
 void test_estimate_sec() {
-	printf(" === test_estimate_sec ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* diag2 = 	"......o"
 				".....ox"
@@ -166,7 +190,7 @@ void test_estimate_sec() {
 }
 
 void test_estimate_utility_1() {
-	printf(" === test_estimate_utility_1 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* board = 	"......."
 				"......."
@@ -181,7 +205,7 @@ void test_estimate_utility_1() {
 }
 
 void test_estimate_utility_2() {
-	printf(" === test_estimate_utility_2 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* board = 	"......."
 				"......."
@@ -196,7 +220,7 @@ void test_estimate_utility_2() {
 }
 
 void test_estimate_utility_3() {
-	printf(" === test_estimate_utility_2 ===\n");
+	printf(" === %s ===\n", __func__);
 
 	const char* board = 	"       "
 				"       "
@@ -214,7 +238,9 @@ int main() {
 	test_rows_1();
 	test_cols_1();
 	test_pri_1();
+	test_pri_2();
 	test_sec_1();
+	test_sec_2();
 
 	test_estimate_rows();
 	test_estimate_cols();
