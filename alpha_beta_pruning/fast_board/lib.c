@@ -181,7 +181,7 @@ void estimate_utility_v2c(
 
 		assert(acc.d <= span);
 
-		for (int i = 1; i < span; i++) {
+		for (int i = 1; i <= span; i++) {
 			if (acc.d == span - i) {
 				if (acc.x == i) {
 					utility.x += weight;
