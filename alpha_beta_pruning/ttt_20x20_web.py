@@ -72,7 +72,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 				"body { font-family: system-ui; font-size: 20px; }"\
 				"td { width: 1rem; height: 1rem; text-align: center; border: 1px solid black; }"\
 				"td form { height: inherit; }"\
-				"td form button { display: block; height: 100%; width: 100%; border: 1px solid black; }"\
+				"td form button { display: block; height: 100%; width: 100%; border: none; }"\
 				".red { background-color: red; }"\
 				".yellow { background-color: yellow; }"\
 				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
