@@ -252,7 +252,6 @@ void estimate_utility_v2c(
 				acc.s++;
 				break;
 			default:
-				printf("ee %c.\n", a);
 				assert(0);
 		}
 
@@ -283,16 +282,9 @@ void estimate_utility_v2c(
 		acc.s = 0;
 	}
 
-	printf("rows\n");
 	rows(bitmap, w, h, span, push, push_pop, flush);
-
-	printf("cols\n");
 	cols(bitmap, w, h, span, push, push_pop, flush);
-
-	printf("pri\n");
 	pri(bitmap, w, h, span, push, push_pop, flush);
-
-	printf("sec\n");
 	sec(bitmap, w, h, span, push, push_pop, flush);
 
 	*utility_x = utility.x;
