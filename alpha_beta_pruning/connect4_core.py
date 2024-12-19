@@ -274,7 +274,7 @@ class BoardState:
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if self.winner or depth >= 7:
+		if self.winner or depth >= 3:
 			return []
 
 		# Небольшой костыль
