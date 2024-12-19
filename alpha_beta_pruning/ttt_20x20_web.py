@@ -99,12 +99,12 @@ class TTTHandler(BaseHTTPRequestHandler):
 			return "".join(options)
 
 
+		moves = "x"
+
 		# Компьютер
 		if loc.future:
 			#doc.append("<div>Computer has options:</div>")
 			#doc.append(recurse_options(loc))
-
-			doc.append("<div>Computer makes a move:</div>")
 
 			loc.future = filter(lambda x: x.moved == "o", loc.future)
 
@@ -115,11 +115,15 @@ class TTTHandler(BaseHTTPRequestHandler):
 
 			if not loc.future:
 				doc.append("<div>The computer won</div>")
+				moves = ""
+			else:
+				doc.append("<div>Computer makes a move:</div>")
 		else:
 			doc.append("<div>You won</div>")
+			moves = ""
 
 		present = 	"<div class='option'>"\
-				f"{self.board_as_table(loc, moves='x')}"\
+				f"{self.board_as_table(loc, moves=moves)}"\
 				"</div>" if loc.moved else ""
 
 		doc.append(present)
