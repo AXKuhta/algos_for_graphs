@@ -46,7 +46,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 		turn = int(params.get(b"turn")[0])
 		moved = params.get(b"moved", [b""])[0].decode()
 
-		loc_bm = Bitmap(state, 5, 5)
+		loc_bm = Bitmap(state, 20, 20)
 		loc = TTTBoardState(loc_bm, None, turn, moved)
 		loc.explore()
 
@@ -82,8 +82,8 @@ class TTTHandler(BaseHTTPRequestHandler):
 
 		# Компьютер
 		if loc.future:
-			doc.append("<div>Computer has options:</div>")
-			doc.append(recurse_options(loc))
+			#doc.append("<div>Computer has options:</div>")
+			#doc.append(recurse_options(loc))
 
 			doc.append("<div>Computer makes a move:</div>")
 
@@ -126,7 +126,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 		self.text_response("".join(doc))
 
 	def handle_index(self):
-		init_state = 	"."*5*5
+		init_state = 	"."*20*20
 
 		response = 	"<!DOCTYPE html>"\
 				"<div>Welcome to ttt20x20</div>"\
