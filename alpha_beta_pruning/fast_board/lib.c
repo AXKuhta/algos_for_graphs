@@ -177,41 +177,19 @@ void estimate_utility_v2c(
 	//}
 
 	void step() {
-		switch (acc.d) {
-			case 4:
-				break;
-			case 3:
-				if (acc.x == 1) {
-					utility.x += 10;
-				} else if (acc.o == 1) {
-					utility.o += 10;
+		int weight = 10;
+
+		assert(acc.d <= span);
+
+		for (int i = 1; i < span; i++) {
+			if (acc.d == span - i) {
+				if (acc.x == i) {
+					utility.x += weight;
+				} else if (acc.o == i) {
+					utility.o += weight;
 				}
-				break;
-			case 2:
-				if (acc.x == 2) {
-					utility.x += 100;
-				} else if (acc.o == 2) {
-					utility.o += 100;
-				}
-				break;
-			case 1:
-				if (acc.x == 3) {
-					utility.x += 1000;
-				} else if (acc.o == 3) {
-					utility.o += 1000;
-				}
-				break;
-			case 0:
-				if (acc.x == 4) {
-					utility.x += 10000;
-					*winner = 'x';
-				} else if (acc.o == 4) {
-					utility.o += 10000;
-					*winner = 'o';
-				}
-				break;
-			default:
-				assert(0);
+			}
+			weight *= 10;
 		}
 	}
 
