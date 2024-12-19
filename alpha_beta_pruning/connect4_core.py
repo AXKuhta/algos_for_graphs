@@ -1,3 +1,4 @@
+from queue import PriorityQueue
 from ctypes import cdll
 
 from bitmap import Bitmap
@@ -282,13 +283,22 @@ class BoardState:
 		sentinel = object()
 
 		if self.turn == 0:
-			self.future = self.explore_("x") + [sentinel] + self.explore_("o")
+			#self.future = self.explore_("x") + [sentinel] + self.explore_("o")
+			self.future = self.explore_("o")
 		else:
 			self.future = self.explore_("o" if self.moved == "x" else "x")
 
+		prio = PriorityQueue()
+
+		for future in self.future:
+			future.estimate_utility_v3()
+			prio.put(future)
+
 		# Оценить варианты будущего
 		# Поиск в глубину
-		for future in self.future:
+		while not prio.empty():
+			future = prio.get()
+
 			if future == sentinel:
 				self.x_appetite = -99999
 				self.o_appetite = +99999
@@ -296,7 +306,6 @@ class BoardState:
 
 			moving = future.moved
 
-			future.estimate_utility_v3()
 
 			future.x_appetite = self.x_appetite
 			future.o_appetite = self.o_appetite
@@ -325,8 +334,8 @@ class BoardState:
 					self.o_appetite = future.utility
 					self.utility = future.utility
 
-		if self.turn == 0:
-			self.future.remove(sentinel)
+		#if self.turn == 0:
+		#	self.future.remove(sentinel)
 
 		return self.future
 
@@ -372,6 +381,13 @@ class BoardState:
 
 	def __repr__(self):
 		return f"BoardState(utility_x={self.utility_x}, utility_o={self.utility_o})"
+
+	# Для очереди с приоритетом
+	def __lt__(self, other):
+		if self.moved == "x":
+			return self.utility > other.utility
+		else:
+			return self.utility < other.utility
 
 bm_init = 	b"       "\
 		b"       "\
