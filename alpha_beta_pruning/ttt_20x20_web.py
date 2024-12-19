@@ -15,21 +15,38 @@ class TTTHandler(BaseHTTPRequestHandler):
 		else:
 			self.text_response(f"Unknown path [{self.path}]", status=HTTPStatus.NOT_FOUND)
 
-	def board_as_table(self, board):
+	def board_as_table(self, board, moves=""):
 		rows = []
 
-		for line in str(board).split("\n"):
+		for i in range(board.bitmap.h):
 			cols = []
-			for c in line:
+
+			for j in range(board.bitmap.w):
+				c = chr(board.bitmap.bitmap[i*board.bitmap.w + j])
+
 				if c == "x":
-					classname = "red"
+					cols.append("<td class='red'></td>")
 				elif c == "o":
-					classname = "yellow"
+					cols.append("<td class='yellow'></td>")
 				else:
-					classname = ""
-				cols.append(f"<td class='{classname}'>")
-				#cols.append(c)
-				cols.append("</td>")
+					turn = board.turn + 1
+					moved = "x" if board.moved == "o" else "o"
+					bmcopy = bytearray(board.bitmap.bitmap)
+					bmcopy[i*board.bitmap.w + j] = ord(moved)
+					bmcopy = bmcopy.decode()
+
+					if moves:
+						cols.append("<td class=''>")
+						cols.append("<form action='/' method='POST'>")
+						cols.append(f"<input type='hidden' name='state' value='{bmcopy}'>")
+						cols.append(f"<input type='hidden' name='moved' value='{moved}'>")
+						cols.append(f"<input type='hidden' name='turn' value='{turn}'>")
+						cols.append("<button>")
+						cols.append("</button>")
+						cols.append("</form>")
+						cols.append("</td>")
+					else:
+						cols.append("<td class=''></td>")
 
 			rows.append("<tr>")
 			rows.append( "".join(cols) )
@@ -46,7 +63,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 		turn = int(params.get(b"turn")[0])
 		moved = params.get(b"moved", [b""])[0].decode()
 
-		loc_bm = Bitmap(state, 20, 20)
+		loc_bm = Bitmap(state, 10, 10)
 		loc = TTTBoardState(loc_bm, None, turn, moved)
 		loc.explore()
 
@@ -54,6 +71,8 @@ class TTTHandler(BaseHTTPRequestHandler):
 				"<style>"\
 				"body { font-family: system-ui; font-size: 20px; }"\
 				"td { width: 1rem; height: 1rem; text-align: center; border: 1px solid black; }"\
+				"td form { height: inherit; }"\
+				"td form button { display: block; height: 100%; width: 100%; border: 1px solid black; }"\
 				".red { background-color: red; }"\
 				".yellow { background-color: yellow; }"\
 				".option { display: inline-block; padding: 1rem; margin: 1rem; border: 1px solid black; }"\
@@ -66,7 +85,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 
 			for i, s in enumerate(loc.future):
 				option = 	"<div class='option'>"\
-						f"{self.board_as_table(s.bitmap)}"\
+						f"{self.board_as_table(s)}"\
 						f"Hoisted: {s.utility}<br>"\
 						f"Utility: {s.base_utility}"\
 						"<details>"\
@@ -100,17 +119,18 @@ class TTTHandler(BaseHTTPRequestHandler):
 			doc.append("<div>You won</div>")
 
 		present = 	"<div class='option'>"\
-				f"{self.board_as_table(loc.bitmap)}"\
+				f"{self.board_as_table(loc, moves='x')}"\
 				"</div>" if loc.moved else ""
 
 		doc.append(present)
 
+		"""
 		options = []
 
 		for i, s in enumerate(loc.future):
 			option = 	"<div class='option'>"\
 					"<form action='/' method='POST'>"\
-					f"{self.board_as_table(s.bitmap)}"\
+					f"{self.board_as_table(s)}"\
 					f"<input type='hidden' name='state' value='{s.bitmap.bitmap.decode()}'>"\
 					f"<input type='hidden' name='moved' value='{s.moved}'>"\
 					f"<input type='hidden' name='turn' value='{s.turn}'>"\
@@ -122,11 +142,12 @@ class TTTHandler(BaseHTTPRequestHandler):
 
 		doc.append("<div>Make your move</div>")
 		doc.extend(options)
+		"""
 
 		self.text_response("".join(doc))
 
 	def handle_index(self):
-		init_state = 	"."*20*20
+		init_state = 	"."*10*10
 
 		response = 	"<!DOCTYPE html>"\
 				"<div>Welcome to ttt20x20</div>"\
