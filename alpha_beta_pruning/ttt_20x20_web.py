@@ -114,12 +114,18 @@ class TTTHandler(BaseHTTPRequestHandler):
 				loc = min(loc.future, key=lambda x: x.utility)
 
 			if not loc.future:
-				doc.append("<div>The computer won</div>")
+				if loc.winner == ord("o"):
+					doc.append("<div>The computer won</div>")
+				else:
+					doc.append("<div>No winners</div>")
 				moves = ""
 			else:
 				doc.append("<div>Computer makes a move:</div>")
 		else:
-			doc.append("<div>You won</div>")
+			if loc.winner == ord("x"):
+				doc.append("<div>You won</div>")
+			else:
+				doc.append("<div>No winners</div>")
 			moves = ""
 
 		present = 	"<div class='option'>"\
