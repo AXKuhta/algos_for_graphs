@@ -185,8 +185,10 @@ void estimate_utility_v2c(
 			if (acc.d == span - i) {
 				if (acc.x == i) {
 					utility.x += weight;
+					if (i == span) *winner = 'x';
 				} else if (acc.o == i) {
 					utility.o += weight;
+					if (i == span) *winner = 'o';
 				}
 			}
 			weight *= 10;
