@@ -63,7 +63,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 		turn = int(params.get(b"turn")[0])
 		moved = params.get(b"moved", [b""])[0].decode()
 
-		loc_bm = Bitmap(state, 10, 10)
+		loc_bm = Bitmap(state, 20, 20)
 		loc = TTTBoardState(loc_bm, None, turn, moved)
 		loc.explore()
 
@@ -157,7 +157,7 @@ class TTTHandler(BaseHTTPRequestHandler):
 		self.text_response("".join(doc))
 
 	def handle_index(self):
-		init_state = 	"."*10*10
+		init_state = 	"."*20*20
 
 		response = 	"<!DOCTYPE html>"\
 				"<div>Welcome to ttt20x20</div>"\

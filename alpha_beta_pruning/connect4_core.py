@@ -275,7 +275,7 @@ class BoardState:
 
 		# Кто-то победил или достигнута максимальная глубина?
 		# Ранний выход
-		if self.winner or depth >= 3:
+		if self.winner or depth >= 5:
 			return []
 
 		# Небольшой костыль
@@ -296,7 +296,8 @@ class BoardState:
 
 		# Оценить варианты будущего
 		# Поиск в глубину
-		while not prio.empty():
+		#while not prio.empty():
+		for i in range(10):
 			future = prio.get()
 
 			if future == sentinel:
