@@ -151,6 +151,21 @@ void sec(
 	}
 }
 
+// Оценочная функция
+// Выполняет пробежку окном по строкам, стобцам и диагоналям
+//
+// .	открытая позиция
+// x	крестик
+// o 	нолик
+//
+// Количество	Оценка
+// ....x	10
+// ...xx	100
+// ..xxx	1000
+// .xxxx	10000
+// xxxxx	100000, x - победитель
+//
+// Если в окне есть крестики и нолики одновременно, то оценка 0
 void estimate_utility_v2c(
 	const char* bitmap,
 	uint32_t w,
@@ -271,6 +286,7 @@ void estimate_utility_v2c(
 	*utility_o = utility.o;
 }
 
+// Упрощённая обертка для тестов
 int estimate_utility_v2b(const char* bitmap, uint32_t w, uint32_t h, int span) {
 	int utility_x;
 	int utility_o;
