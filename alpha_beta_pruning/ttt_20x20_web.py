@@ -65,7 +65,9 @@ class TTTHandler(BaseHTTPRequestHandler):
 
 		loc_bm = Bitmap(state, 10, 10)
 		loc = TTTBoardState(loc_bm, None, turn, moved)
-		loc.explore()
+
+		if loc.moved:
+			loc.explore()
 
 		opener = 	"<!DOCTYPE html>"\
 				"<style>"\
@@ -99,60 +101,56 @@ class TTTHandler(BaseHTTPRequestHandler):
 			return "".join(options)
 
 
-		moves = "x"
+		moves = ""
 
-		# Компьютер
-		if loc.future:
-			#doc.append("<div>Computer has options:</div>")
-			#doc.append(recurse_options(loc))
+		# Варианты:
+		# - Игрок сходил
+		#   - Нет вариантов будущего
+		#     - Игрок победил
+		#     - Или ничья
+		#   - Есть варианты будущего
+		#     - Ходит компьютер
+		#       - Нет вариантов будущего
+		#         - Компьютер победил
+		#         - Или ничья
+		#       - Есть варианты будущего
+		# - Ещё никто не сходил
+		if loc.moved:
+			if loc.future:
+				#doc.append("<div>Computer has options:</div>")
+				#doc.append(recurse_options(loc))
 
-			loc.future = filter(lambda x: x.moved == "o", loc.future)
+				if loc.moved == "o":
+					loc = max(loc.future, key=lambda x: x.utility)
+				else:
+					loc = min(loc.future, key=lambda x: x.utility)
 
-			if loc.moved == "o":
-				loc = max(loc.future, key=lambda x: x.utility)
+
+				if not loc.future:
+					if loc.winner:
+						doc.append("<div>The computer won</div>")
+					else:
+						doc.append("<div>No winners</div>")
+				else:
+					doc.append("<div>Computer makes a move:</div>")
+					moves = "x"
 			else:
-				loc = min(loc.future, key=lambda x: x.utility)
-
-			if not loc.future:
-				if loc.winner == ord("o"):
-					doc.append("<div>The computer won</div>")
+				moves = ""
+				if loc.winner:
+					doc.append("<div>You won</div>")
 				else:
 					doc.append("<div>No winners</div>")
-				moves = ""
-			else:
-				doc.append("<div>Computer makes a move:</div>")
 		else:
-			if loc.winner == ord("x"):
-				doc.append("<div>You won</div>")
-			else:
-				doc.append("<div>No winners</div>")
-			moves = ""
+			moves="x"
 
 		present = 	"<div class='option'>"\
 				f"{self.board_as_table(loc, moves=moves)}"\
-				"</div>" if loc.moved else ""
+				"</div>"
 
 		doc.append(present)
 
-		"""
-		options = []
-
-		for i, s in enumerate(loc.future):
-			option = 	"<div class='option'>"\
-					"<form action='/' method='POST'>"\
-					f"{self.board_as_table(s)}"\
-					f"<input type='hidden' name='state' value='{s.bitmap.bitmap.decode()}'>"\
-					f"<input type='hidden' name='moved' value='{s.moved}'>"\
-					f"<input type='hidden' name='turn' value='{s.turn}'>"\
-					"<input type='submit' value='Select'>"\
-					"</form>"\
-					"</div>"
-
-			options.append(option)
-
-		doc.append("<div>Make your move</div>")
-		doc.extend(options)
-		"""
+		if moves:
+			doc.append("<div>Make your move</div>")
 
 		self.text_response("".join(doc))
 
