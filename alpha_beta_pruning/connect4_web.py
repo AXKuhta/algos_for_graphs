@@ -123,7 +123,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 
 				if not loc.future:
-					if loc.winner == ord("o"):
+					if loc.winner:
 						doc.append("<div>The computer won</div>")
 					else:
 						doc.append("<div>No winners</div>")
@@ -132,7 +132,7 @@ class Connect4Handler(BaseHTTPRequestHandler):
 					moves = "x"
 			else:
 				moves = ""
-				if loc.winner == ord("x"):
+				if loc.winner:
 					doc.append("<div>You won</div>")
 				else:
 					doc.append("<div>No winners</div>")

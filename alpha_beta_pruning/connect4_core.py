@@ -25,6 +25,9 @@ class BoardState:
 		self.x_appetite = -99999
 		self.o_appetite = +99999
 
+		# При создании состояния сразу оценить его
+		self.estimate_utility_v3()
+
 	# Оценить полезность этого конкретного состояния
 	# Возможны два сценария:
 	# - Агент пытается максимизировать только свою полезность
@@ -285,7 +288,6 @@ class BoardState:
 		prio = PriorityQueue()
 
 		for future in self.future:
-			future.estimate_utility_v3()
 			prio.put(future)
 
 		# Оценить варианты будущего
