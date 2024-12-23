@@ -278,15 +278,9 @@ class BoardState:
 		if self.winner or depth >= 3:
 			return []
 
-		# Небольшой костыль
-		# Сброс альфа и бета значений когда начинаем оценивать за другого игрока
-		sentinel = object()
+		assert self.moved, "I don't know whose turn it is"
 
-		if self.turn == 0:
-			#self.future = self.explore_("x") + [sentinel] + self.explore_("o")
-			self.future = self.explore_("o")
-		else:
-			self.future = self.explore_("o" if self.moved == "x" else "x")
+		self.future = self.explore_("o" if self.moved == "x" else "x")
 
 		prio = PriorityQueue()
 
@@ -299,13 +293,7 @@ class BoardState:
 		while not prio.empty():
 			future = prio.get()
 
-			if future == sentinel:
-				self.x_appetite = -99999
-				self.o_appetite = +99999
-				continue
-
 			moving = future.moved
-
 
 			future.x_appetite = self.x_appetite
 			future.o_appetite = self.o_appetite
@@ -333,9 +321,6 @@ class BoardState:
 				if future.utility <= self.o_appetite:
 					self.o_appetite = future.utility
 					self.utility = future.utility
-
-		#if self.turn == 0:
-		#	self.future.remove(sentinel)
 
 		return self.future
 
