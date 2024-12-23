@@ -285,6 +285,9 @@ class BoardState:
 
 		self.future = self.explore_("o" if self.moved == "x" else "x")
 
+		# Использовать очередь с приоритетом чтобы первыми рассмотреть
+		# варианты с высокой полезностью для того, кто ходит сейчас, и,
+		# возможно, начать раньше отбрасывать менее благоприятные ветки
 		prio = PriorityQueue()
 
 		for future in self.future:
