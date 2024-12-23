@@ -163,7 +163,13 @@ class TTTHandler(BaseHTTPRequestHandler):
 				f"<input type='hidden' name='state' value='{init_state}'>"\
 				f"<input type='hidden' name='moved' value=''>"\
 				f"<input type='hidden' name='turn' value='0'>"\
-				"<input type='submit' value='Play'>"\
+				"<input type='submit' value='Play (the player moves first)'>"\
+				"</form>"\
+				"<form action='/' method='POST'>"\
+				f"<input type='hidden' name='state' value='{init_state}'>"\
+				f"<input type='hidden' name='moved' value='o'>"\
+				f"<input type='hidden' name='turn' value='0'>"\
+				"<input type='submit' value='Play (computer moves first)'>"\
 				"</form>"
 
 		self.text_response(response)
