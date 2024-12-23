@@ -110,8 +110,19 @@ class Connect4Handler(BaseHTTPRequestHandler):
 
 		moves = ""
 
+		# Варианты:
+		# - Игрок сходил
+		#   - Нет вариантов будущего
+		#     - Игрок победил
+		#     - Или ничья
+		#   - Есть варианты будущего
+		#     - Ходит компьютер
+		#       - Нет вариантов будущего
+		#         - Компьютер победил
+		#         - Или ничья
+		#       - Есть варианты будущего
+		# - Ещё никто не сходил
 		if loc.moved:
-			# Компьютер
 			if loc.future:
 				#doc.append("<div>Computer has options:</div>")
 				#doc.append(recurse_options(loc))
