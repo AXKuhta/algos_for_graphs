@@ -1,5 +1,5 @@
 
-from random import choice, choices, seed
+from random import choice, choices, seed, random
 import json
 import sys
 
@@ -96,8 +96,22 @@ def load_from_file(filename):
 			)
 
 			edges[ a, b ] = edge
-
 			a.connected.append( (b, edge) )
+
+			"""
+			# Альтернативно: убрать направленность из графа
+			edge = Edge(
+				cost = w,
+				tau = 0.1,
+				nu = 1/w if w else 999999999,
+				a=b,
+				b=a
+			)
+
+			edges[ b, a ] = edge
+			b.connected.append( (a, edge) )
+			"""
+
 
 	#
 	# Проверки на разумность:
@@ -123,6 +137,8 @@ def load_from_file(filename):
 # - Застряли
 #   Умираем
 #
+
+every_ant = []
 
 #
 # Муравей
@@ -167,6 +183,7 @@ class Ant:
 			self.hist.append(fin_edge)
 			self.cost += fin_edge.cost
 			self.update_tau()
+			every_ant.append(self.cost)
 			return "fin"
 
 		where, = choices(options, weights)
@@ -207,6 +224,12 @@ def run():
 	for i in range(epochs):
 		pending = [Ant(init) for init in nodes.values()] # Поставить муравья в каждую ноду
 
+		# Альтернативно: запускать совсем немного муравьев
+		#pending=[]
+		#for init in nodes.values():
+		#	if random() > 0.99:
+		#		pending.append(Ant(init))
+
 		# Ходим
 		while pending:
 			retained = []
@@ -236,6 +259,13 @@ def run():
 		if i >= stagnation and len(set(min_cost_y[-stagnation:])) == 1:
 			print("stagnated at", i)
 			break
+
+	plt.figure(dpi=300)
+	plt.title("Every individual ant who succceeded")
+	plt.xlabel("Ant number")
+	plt.ylabel("Cost")
+	plt.plot(every_ant)
+	plt.show()
 
 	if min_path:
 		print("Final cost", min_cost)
